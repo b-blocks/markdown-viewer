@@ -10,7 +10,7 @@ body {
 .container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 header {
@@ -74,12 +74,10 @@ header h1 {
 .main-content {
     display: flex;
     flex-grow: 1;
-    overflow: hidden;
 }
 
 .panel {
     padding: 2rem;
-    overflow-y: auto;
 }
 
 #toc-panel {
@@ -312,22 +310,4 @@ header h1 {
     border: none;
     border-top: 2px solid #e1e4e8;
     margin: 2.5rem 0;
-}
-
-/* 스크롤바 스타일링 */
-.panel::-webkit-scrollbar {
-    width: 8px;
-}
-
-.panel::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-.panel::-webkit-scrollbar-thumb {
-    background: #cbd5e0;
-    border-radius: 4px;
-}
-
-.panel::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0;
 }
