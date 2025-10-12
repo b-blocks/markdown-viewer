@@ -66,6 +66,7 @@ header h1 {
     flex: 0 0 250px;
     background-color: #fafafa;
     border-right: 1px solid #ddd;
+    font-size: 0.95rem; /* Reduce font size for the entire panel */
 }
 
 #toc-panel ul {
