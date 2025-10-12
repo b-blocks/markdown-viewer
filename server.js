@@ -1,13 +1,14 @@
 // server.js
 const express = require('express');
 const axios = require('axios');
+const path = require('path');
 const cors = require('cors');
 
 const app = express();
 const port = 3000;
 
 app.use(cors());
-app.use(express.static('public')); // Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
 
 app.get('/fetch-markdown', async (req, res) => {
     const { url } = req.query;
