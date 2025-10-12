@@ -32,13 +32,22 @@ A simple web service to view markdown files from raw GitHub links with a table o
     pnpm install
     ```
 
-4.  **Start the server**
+4.  **Run for Development**
 
+    For development, you can run the server with `nodemon`, which will automatically restart when you save file changes.
+
+    ```bash
+    pnpm dev
+    ```
+
+5.  **Run for Production**
+
+    To run the server normally (without auto-restarting), use the `start` command.
     ```bash
     pnpm start
     ```
 
-5.  Open your browser and navigate to `http://localhost:3000`.
+6.  Open your browser and navigate to `http://localhost:3000`.
 
 ## Deploy to Vercel
 
