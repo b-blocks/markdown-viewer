@@ -41,6 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Render markdown to HTML
             contentPanel.innerHTML = marked.parse(markdown);
 
+            // Apply syntax highlighting to all <pre><code> blocks
+            contentPanel.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+
             // Generate Table of Contents
             generateToc();
 
@@ -78,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
             link.href = `#${id}`;
             link.textContent = heading.textContent;
             link.classList.add(`toc-level-${level}`); // Add class for styling
-            link.style.marginLeft = `${(level - 1) * 1}rem`; // Indent based on heading level
 
             tocItem.appendChild(link);
             tocList.appendChild(tocItem);
