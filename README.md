@@ -39,3 +39,21 @@ A simple web service to view markdown files from raw GitHub links with a table o
     ```
 
 5.  Open your browser and navigate to `http://localhost:3000`.
+
+## Deploy to Vercel
+
+This project can be easily deployed with Vercel.
+
+1.  **Fork this repository** to your GitHub account.
+
+2.  **Go to your Vercel Dashboard** and click "Add New... > Project".
+
+3.  **Import your forked repository** from GitHub.
+
+4.  Vercel will automatically detect the project settings (including the use of `pnpm`). No additional configuration is needed.
+
+5.  Click **"Deploy"**.
+
+Once deployed, you will get a public URL for your Markdown Viewer.
+
+[!Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fb-blocks%2Fmarkdown-viewer&project-name=markdown-viewer&repository-name=my-markdown-viewer)
