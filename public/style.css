@@ -35,6 +35,22 @@ header h1 {
     gap: 0;
 }
 
+.file-selector {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e1e4e8;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.file-selector:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
 #markdownUrl {
     flex-grow: 1;
     padding: 0.75rem 1rem;

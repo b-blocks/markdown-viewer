@@ -16,9 +16,9 @@
     <div class="container">
         <header>
             <h1>Markdown Viewer</h1>
-            <div class="url-input-container">
-                <input type="text" id="markdownUrl" placeholder="Enter GitHub raw markdown URL..." value="https://raw.githubusercontent.com/b-blocks/StudyMaterials/refs/heads/main/starterstory.md">
-                <button id="viewButton">View</button>
+            <div class="url-input-container" id="file-selector-container">
+                <label for="fileSelector" style="display: none;">Select a file:</label>
+                <select id="fileSelector" class="file-selector"></select>
             </div>
         </header>
         <main class="main-content">

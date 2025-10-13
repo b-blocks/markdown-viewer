@@ -1,29 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const viewButton = document.getElementById('viewButton');
-    const markdownUrlInput = document.getElementById('markdownUrl');
+    const fileSelector = document.getElementById('fileSelector');
+    const fileSelectorContainer = document.getElementById('file-selector-container');
     const tocPanel = document.getElementById('toc-panel');
     const contentPanel = document.getElementById('content-panel');
 
-    viewButton.addEventListener('click', loadMarkdown);
-    // Allow pressing Enter in the input field to trigger the view
-    markdownUrlInput.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
-            loadMarkdown();
-        }
-    });
+    const GITHUB_API_URL = 'https://api.github.com/repos/b-blocks/StudyMaterials/contents/';
 
-    // Load the default markdown on page load
-    if (markdownUrlInput.value) {
-        loadMarkdown();
+    async function populateFileSelector() {
+        fileSelectorContainer.innerHTML = '<p>Loading file list...</p>';
+        try {
+            const response = await fetch(GITHUB_API_URL);
+            if (!response.ok) {
+                throw new Error(`GitHub API error! status: ${response.status}`);
+            }
+            const files = await response.json();
+            const markdownFiles = files.filter(file => file.name.endsWith('.md'));
+
+            if (markdownFiles.length === 0) {
+                fileSelectorContainer.innerHTML = '<p>No markdown files found in the repository.</p>';
+                return;
+            }
+            
+            // Clear loading message and show selector
+            fileSelectorContainer.innerHTML = '';
+            fileSelectorContainer.appendChild(fileSelector);
+
+            markdownFiles.forEach(file => {
+                const option = document.createElement('option');
+                option.value = file.download_url;
+                option.textContent = file.name;
+                fileSelector.appendChild(option);
+            });
+
+            // Add event listener and load the first file
+            fileSelector.addEventListener('change', loadMarkdown);
+            loadMarkdown(); // Load the initially selected file
+
+        } catch (error) {
+            fileSelectorContainer.innerHTML = `<p style="color: red;">Error loading file list: ${error.message}</p>`;
+        }
     }
 
     async function loadMarkdown() {
-        const url = markdownUrlInput.value.trim();
-        if (!url) {
-            // Use a less disruptive notification
-            contentPanel.innerHTML = `<p style="color: orange;">Please enter a URL.</p>`;
-            return;
-        }
+        const selectedOption = fileSelector.options[fileSelector.selectedIndex];
+        const url = selectedOption.value;
 
         // Clear previous content
         contentPanel.innerHTML = '<p>Loading...</p>';
@@ -53,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
             contentPanel.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
         }
     }
+
+    // Initialize the application
+    populateFileSelector();
 
     function generateToc() {
         const headings = contentPanel.querySelectorAll('h1, h2, h3, h4, h5, h6');
