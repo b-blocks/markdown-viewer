@@ -1,4 +1,4 @@
-# Markdown Viewer
+# M Book
 
 A simple web service to view markdown files from raw GitHub links with a table of contents.
 
