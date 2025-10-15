@@ -40,15 +40,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Intersection Observer for lazy syntax highlighting
+  let highlightObserver = null
+
+  function initHighlightObserver () {
+    if (highlightObserver) {
+      highlightObserver.disconnect()
+    }
+
+    highlightObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const codeBlock = entry.target
+          if (!codeBlock.dataset.highlighted) {
+            hljs.highlightElement(codeBlock)
+            codeBlock.dataset.highlighted = 'true'
+            highlightObserver.unobserve(codeBlock)
+          }
+        }
+      })
+    }, {
+      rootMargin: '50px' // Start highlighting slightly before it comes into view
+    })
+  }
+
   async function loadMarkdown () {
     const selectedOption = fileSelector.options[fileSelector.selectedIndex]
     const url = selectedOption.value
 
+    // Stop auto-scroll when loading new content
+    if (typeof stopAutoScroll !== 'undefined') {
+      stopAutoScroll()
+    }
+
     // Clear previous content
-    contentPanel.innerHTML = '<p>Loading...</p>'
+    contentPanel.innerHTML = '<div class="loading-spinner"><p>Loading markdown file...</p><div class="spinner"></div></div>'
     tocPanel.innerHTML = ''
 
     try {
+      const startTime = performance.now()
+
       // Fetch markdown from our server endpoint
       const response = await fetch(`/fetch-markdown?url=${encodeURIComponent(url)}`)
       if (!response.ok) {
@@ -57,16 +88,49 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const markdown = await response.text()
 
-      // Render markdown to HTML
-      contentPanel.innerHTML = marked.parse(markdown)
+      const fetchTime = performance.now() - startTime
+      console.log(`Fetched markdown in ${fetchTime.toFixed(2)}ms (${(markdown.length / 1024).toFixed(2)} KB)`)
 
-      // Apply syntax highlighting to all <pre><code> blocks
-      contentPanel.querySelectorAll('pre code').forEach((block) => {
-        hljs.highlightElement(block)
+      // Show rendering progress
+      contentPanel.innerHTML = '<div class="loading-spinner"><p>Rendering markdown...</p><div class="spinner"></div></div>'
+
+      // Use requestAnimationFrame to prevent blocking the UI
+      requestAnimationFrame(() => {
+        const renderStart = performance.now()
+
+        // Render markdown to HTML (marked.js is quite fast)
+        contentPanel.innerHTML = marked.parse(markdown)
+
+        const renderTime = performance.now() - renderStart
+        console.log(`Rendered HTML in ${renderTime.toFixed(2)}ms`)
+
+        // Initialize intersection observer for lazy highlighting
+        initHighlightObserver()
+
+        // Set up lazy syntax highlighting for code blocks
+        const codeBlocks = contentPanel.querySelectorAll('pre code')
+        console.log(`Found ${codeBlocks.length} code blocks`)
+
+        if (codeBlocks.length > 0) {
+          // Highlight the first few visible code blocks immediately
+          const immediateHighlight = Math.min(5, codeBlocks.length)
+          for (let i = 0; i < immediateHighlight; i++) {
+            hljs.highlightElement(codeBlocks[i])
+            codeBlocks[i].dataset.highlighted = 'true'
+          }
+
+          // Set up lazy loading for the rest
+          for (let i = immediateHighlight; i < codeBlocks.length; i++) {
+            highlightObserver.observe(codeBlocks[i])
+          }
+        }
+
+        // Generate Table of Contents
+        generateToc()
+
+        const totalTime = performance.now() - startTime
+        console.log(`Total load time: ${totalTime.toFixed(2)}ms`)
       })
-
-      // Generate Table of Contents
-      generateToc()
     } catch (error) {
       contentPanel.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`
     }
@@ -111,4 +175,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tocPanel.appendChild(tocList)
   }
+
+  // Auto-scroll functionality
+  let autoScrollInterval = null
+  let isAutoScrolling = false
+  const autoScrollBtn = document.getElementById('autoScrollBtn')
+  const scrollSpeed = 2 // pixels per frame (adjust for faster/slower scrolling)
+  const scrollFps = 60 // frames per second
+
+  function startAutoScroll () {
+    if (isAutoScrolling) return
+
+    isAutoScrolling = true
+    autoScrollBtn.classList.add('scrolling')
+    autoScrollBtn.title = 'Stop Auto Scroll'
+
+    autoScrollInterval = setInterval(() => {
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+
+      // Stop if reached bottom
+      if (currentScroll >= maxScroll - 10) {
+        stopAutoScroll()
+        autoScrollBtn.classList.add('at-bottom')
+        return
+      }
+
+      window.scrollBy({
+        top: scrollSpeed,
+        behavior: 'auto'
+      })
+    }, 1000 / scrollFps)
+  }
+
+  function stopAutoScroll () {
+    if (!isAutoScrolling) return
+
+    isAutoScrolling = false
+    autoScrollBtn.classList.remove('scrolling')
+    autoScrollBtn.title = 'Auto Scroll'
+
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval)
+      autoScrollInterval = null
+    }
+  }
+
+  function toggleAutoScroll () {
+    if (isAutoScrolling) {
+      stopAutoScroll()
+    } else {
+      autoScrollBtn.classList.remove('at-bottom')
+      startAutoScroll()
+    }
+  }
+
+  // Event listeners for auto-scroll button
+  autoScrollBtn.addEventListener('click', toggleAutoScroll)
+
+  // Stop auto-scroll if user manually scrolls
+  window.addEventListener('wheel', () => {
+    if (isAutoScrolling) {
+      stopAutoScroll()
+    }
+  }, { passive: true })
+
+  // Check if at bottom and update button state
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+
+    if (currentScroll >= maxScroll - 10) {
+      if (isAutoScrolling) {
+        stopAutoScroll()
+      }
+      autoScrollBtn.classList.add('at-bottom')
+    } else {
+      autoScrollBtn.classList.remove('at-bottom')
+    }
+  }, { passive: true })
 })
