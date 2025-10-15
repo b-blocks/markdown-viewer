@@ -327,3 +327,146 @@ header h1 {
     border-top: 2px solid #e1e4e8;
     margin: 2.5rem 0;
 }
+
+/* Loading spinner styles */
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.loading-spinner p {
+    color: #4a5568;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.spinner {
+    border: 4px solid #e1e4e8;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Smooth fade-in for content */
+#content-panel > *:not(.loading-spinner) {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Performance optimization: reduce repaints during scroll */
+#content-panel pre code {
+    will-change: auto;
+    contain: layout style paint;
+}
+
+/* Auto-Scroll Floating Button */
+.auto-scroll-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auto-scroll-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
+}
+
+.auto-scroll-btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Icon states */
+.auto-scroll-btn .play-icon {
+    display: block;
+}
+
+.auto-scroll-btn .pause-icon {
+    display: none;
+}
+
+.auto-scroll-btn.scrolling {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.auto-scroll-btn.scrolling:hover {
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+}
+
+.auto-scroll-btn.scrolling .play-icon {
+    display: none;
+}
+
+.auto-scroll-btn.scrolling .pause-icon {
+    display: block;
+}
+
+/* Pulse animation when scrolling */
+.auto-scroll-btn.scrolling::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #28a745;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Hide button when at bottom of page */
+.auto-scroll-btn.at-bottom {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* Responsive: smaller button on mobile */
+@media (max-width: 768px) {
+    .auto-scroll-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 48px;
+        height: 48px;
+    }
+}
