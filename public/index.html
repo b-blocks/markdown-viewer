@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Viewer</title>
+    <title>M BOOK</title>
     <link rel="stylesheet" href="style.css">
     <!-- Add highlight.js stylesheet (e.g., Atom One Dark theme) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -15,7 +15,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Markdown Viewer</h1>
+            <h1>M Book</h1>
             <div class="url-input-container" id="file-selector-container">
                 <label for="fileSelector" style="display: none;">Select a file:</label>
                 <select id="fileSelector" class="file-selector"></select>
@@ -26,6 +26,17 @@
             <article id="content-panel" class="panel"></article>
         </main>
     </div>
+    
+    <!-- Floating Auto-Scroll Button -->
+    <button id="autoScrollBtn" class="auto-scroll-btn" title="Auto Scroll">
+        <svg class="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
+        </svg>
+        <svg class="pause-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor"/>
+        </svg>
+    </button>
+    
     <script src="script.js"></script>
 </body>
 </html>
