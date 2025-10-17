@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const fileSelector = document.getElementById('fileSelector')
+  // 전체 페이지의 기본 글씨 크기를 10% 줄입니다.
+  document.body.style.fontSize = '70%'
+  // 전체 페이지의 기본 줄 간격을 약 10% 줄입니다. (기본값 1.5 기준)
+  document.body.style.lineHeight = '1'
+
   const fileSelectorContainer = document.getElementById('file-selector-container')
   const tocPanel = document.getElementById('toc-panel')
   const contentPanel = document.getElementById('content-panel')
