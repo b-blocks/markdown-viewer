@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let autoScrollInterval = null
   let isAutoScrolling = false
   const autoScrollBtn = document.getElementById('autoScrollBtn')
-  const scrollSpeed = 2 // pixels per frame (adjust for faster/slower scrolling)
+  const scrollSpeed = 1 // pixels per frame (adjust for faster/slower scrolling)
   const scrollFps = 60 // frames per second
 
   function startAutoScroll () {
