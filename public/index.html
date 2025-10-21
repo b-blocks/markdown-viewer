@@ -20,6 +20,18 @@
                 <label for="fileSelector" style="display: none;">Select a file:</label>
                 <select id="fileSelector" class="file-selector"></select>
             </div>
+            <div class="spacing-controls">
+                <div class="spacing-control-group">
+                    <label for="lineSpacingSlider">줄 간격:</label>
+                    <input type="range" id="lineSpacingSlider" min="1.2" max="2.5" step="0.1" value="1.5">
+                    <span id="lineSpacingValue">1.5</span>
+                </div>
+                <div class="spacing-control-group">
+                    <label for="paragraphSpacingSlider">문단 간격:</label>
+                    <input type="range" id="paragraphSpacingSlider" min="0.8" max="3.0" step="0.1" value="1.5">
+                    <span id="paragraphSpacingValue">1.5rem</span>
+                </div>
+            </div>
         </header>
         <main class="main-content">
             <nav id="toc-panel" class="panel"></nav>

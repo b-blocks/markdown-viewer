@@ -132,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Generate Table of Contents
         generateToc()
+        
+        // Make tables responsive for mobile
+        makeTablesResponsive()
 
         const totalTime = performance.now() - startTime
         console.log(`Total load time: ${totalTime.toFixed(2)}ms`)
@@ -143,6 +146,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize the application
   populateFileSelector()
+  initSpacingControls()
+
+  // Spacing Controls
+  function initSpacingControls() {
+    const lineSpacingSlider = document.getElementById('lineSpacingSlider')
+    const paragraphSpacingSlider = document.getElementById('paragraphSpacingSlider')
+    const lineSpacingValue = document.getElementById('lineSpacingValue')
+    const paragraphSpacingValue = document.getElementById('paragraphSpacingValue')
+
+    // Load saved values from localStorage
+    const savedLineSpacing = localStorage.getItem('lineSpacing')
+    const savedParagraphSpacing = localStorage.getItem('paragraphSpacing')
+
+    if (savedLineSpacing) {
+      lineSpacingSlider.value = savedLineSpacing
+      lineSpacingValue.textContent = savedLineSpacing
+      document.documentElement.style.setProperty('--line-height', savedLineSpacing)
+    }
+
+    if (savedParagraphSpacing) {
+      paragraphSpacingSlider.value = savedParagraphSpacing
+      paragraphSpacingValue.textContent = savedParagraphSpacing + 'rem'
+      document.documentElement.style.setProperty('--paragraph-spacing', savedParagraphSpacing + 'rem')
+    }
+
+    // Line spacing control
+    lineSpacingSlider.addEventListener('input', (e) => {
+      const value = e.target.value
+      lineSpacingValue.textContent = value
+      document.documentElement.style.setProperty('--line-height', value)
+      localStorage.setItem('lineSpacing', value)
+    })
+
+    // Paragraph spacing control
+    paragraphSpacingSlider.addEventListener('input', (e) => {
+      const value = e.target.value
+      paragraphSpacingValue.textContent = value + 'rem'
+      document.documentElement.style.setProperty('--paragraph-spacing', value + 'rem')
+      localStorage.setItem('paragraphSpacing', value)
+    })
+  }
 
   function generateToc () {
     const headings = contentPanel.querySelectorAll('h1, h2, h3, h4, h5, h6')
@@ -181,12 +225,59 @@ document.addEventListener('DOMContentLoaded', () => {
     tocPanel.appendChild(tocList)
   }
 
+  // Make tables responsive for mobile
+  function makeTablesResponsive() {
+    const tables = contentPanel.querySelectorAll('table')
+    
+    tables.forEach(table => {
+      const headers = table.querySelectorAll('th')
+      const rows = table.querySelectorAll('tbody tr')
+      
+      // Add data-label attributes to table cells for mobile display
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td')
+        cells.forEach((cell, index) => {
+          if (headers[index]) {
+            cell.setAttribute('data-label', headers[index].textContent.trim())
+          }
+        })
+      })
+    })
+  }
+
   // Auto-scroll functionality
-  let autoScrollInterval = null
+  let autoScrollAnimationId = null
   let isAutoScrolling = false
   const autoScrollBtn = document.getElementById('autoScrollBtn')
   const scrollSpeed = 1 // pixels per frame (adjust for faster/slower scrolling)
-  const scrollFps = 60 // frames per second
+
+  // Cross-browser compatible scroll position getter
+  function getScrollTop() {
+    return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
+  }
+
+  // Cross-browser compatible scroll position setter
+  function setScrollTop(position) {
+    if (window.scrollTo) {
+      window.scrollTo(0, position)
+    } else if (document.documentElement.scrollTop !== undefined) {
+      document.documentElement.scrollTop = position
+    } else if (document.body.scrollTop !== undefined) {
+      document.body.scrollTop = position
+    }
+  }
+
+  // Cross-browser compatible scroll height getter
+  function getMaxScroll() {
+    return Math.max(
+      document.body.scrollHeight,
+      document.documentElement.scrollHeight,
+      document.body.offsetHeight,
+      document.documentElement.offsetHeight,
+      document.body.clientHeight,
+      document.documentElement.clientHeight
+    ) - window.innerHeight
+  }
 
   function startAutoScroll () {
     if (isAutoScrolling) return
@@ -195,9 +286,11 @@ document.addEventListener('DOMContentLoaded', () => {
     autoScrollBtn.classList.add('scrolling')
     autoScrollBtn.title = 'Stop Auto Scroll'
 
-    autoScrollInterval = setInterval(() => {
-      const currentScroll = window.pageYOffset || document.documentElement.scrollTop
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    function autoScrollFrame() {
+      if (!isAutoScrolling) return
+
+      const currentScroll = getScrollTop()
+      const maxScroll = getMaxScroll()
 
       // Stop if reached bottom
       if (currentScroll >= maxScroll - 10) {
@@ -206,11 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return
       }
 
-      window.scrollBy({
-        top: scrollSpeed,
-        behavior: 'auto'
-      })
-    }, 1000 / scrollFps)
+      // Use requestAnimationFrame for smoother scrolling
+      setScrollTop(currentScroll + scrollSpeed)
+      autoScrollAnimationId = requestAnimationFrame(autoScrollFrame)
+    }
+
+    autoScrollAnimationId = requestAnimationFrame(autoScrollFrame)
   }
 
   function stopAutoScroll () {
@@ -220,9 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
     autoScrollBtn.classList.remove('scrolling')
     autoScrollBtn.title = 'Auto Scroll'
 
-    if (autoScrollInterval) {
-      clearInterval(autoScrollInterval)
-      autoScrollInterval = null
+    if (autoScrollAnimationId) {
+      cancelAnimationFrame(autoScrollAnimationId)
+      autoScrollAnimationId = null
     }
   }
 
@@ -247,8 +341,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Check if at bottom and update button state
   window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset || document.documentElement.scrollTop
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+    const currentScroll = getScrollTop()
+    const maxScroll = getMaxScroll()
 
     if (currentScroll >= maxScroll - 10) {
       if (isAutoScrolling) {
