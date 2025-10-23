@@ -146,47 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize the application
   populateFileSelector()
-  initSpacingControls()
+  initMemoSystem()
 
-  // Spacing Controls
-  function initSpacingControls() {
-    const lineSpacingSlider = document.getElementById('lineSpacingSlider')
-    const paragraphSpacingSlider = document.getElementById('paragraphSpacingSlider')
-    const lineSpacingValue = document.getElementById('lineSpacingValue')
-    const paragraphSpacingValue = document.getElementById('paragraphSpacingValue')
-
-    // Load saved values from localStorage
-    const savedLineSpacing = localStorage.getItem('lineSpacing')
-    const savedParagraphSpacing = localStorage.getItem('paragraphSpacing')
-
-    if (savedLineSpacing) {
-      lineSpacingSlider.value = savedLineSpacing
-      lineSpacingValue.textContent = savedLineSpacing
-      document.documentElement.style.setProperty('--line-height', savedLineSpacing)
-    }
-
-    if (savedParagraphSpacing) {
-      paragraphSpacingSlider.value = savedParagraphSpacing
-      paragraphSpacingValue.textContent = savedParagraphSpacing + 'rem'
-      document.documentElement.style.setProperty('--paragraph-spacing', savedParagraphSpacing + 'rem')
-    }
-
-    // Line spacing control
-    lineSpacingSlider.addEventListener('input', (e) => {
-      const value = e.target.value
-      lineSpacingValue.textContent = value
-      document.documentElement.style.setProperty('--line-height', value)
-      localStorage.setItem('lineSpacing', value)
-    })
-
-    // Paragraph spacing control
-    paragraphSpacingSlider.addEventListener('input', (e) => {
-      const value = e.target.value
-      paragraphSpacingValue.textContent = value + 'rem'
-      document.documentElement.style.setProperty('--paragraph-spacing', value + 'rem')
-      localStorage.setItem('paragraphSpacing', value)
-    })
-  }
 
   function generateToc () {
     const headings = contentPanel.querySelectorAll('h1, h2, h3, h4, h5, h6')
@@ -353,4 +314,229 @@ document.addEventListener('DOMContentLoaded', () => {
       autoScrollBtn.classList.remove('at-bottom')
     }
   }, { passive: true })
+
+  // Memo System
+  function initMemoSystem() {
+    const addMemoBtn = document.getElementById('addMemoBtn')
+    const memoList = document.getElementById('memoList')
+    const memoBtn = document.getElementById('memoBtn')
+    
+    // Load existing memos
+    loadMemos()
+    
+    // Add memo button event listener
+    addMemoBtn.addEventListener('click', () => {
+      showAddMemoDialog()
+    })
+    
+    // Floating memo button event listener
+    if (memoBtn) {
+      memoBtn.addEventListener('click', () => {
+        window.location.href = 'memos.html'
+      })
+    }
+    
+    // Text selection for memo creation
+    contentPanel.addEventListener('mouseup', handleTextSelection)
+  }
+  
+  function loadMemos() {
+    const memos = JSON.parse(localStorage.getItem('memos') || '[]')
+    const memoList = document.getElementById('memoList')
+    
+    memoList.innerHTML = ''
+    
+    if (memos.length === 0) {
+      memoList.innerHTML = '<p style="color: #718096; text-align: center; font-style: italic;">아직 메모가 없습니다.</p>'
+      return
+    }
+    
+    // Sort memos by creation date (newest first)
+    memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    
+    memos.forEach((memo, index) => {
+      const memoElement = createMemoElement(memo, index)
+      memoList.appendChild(memoElement)
+    })
+  }
+  
+  function createMemoElement(memo, index) {
+    const memoDiv = document.createElement('div')
+    memoDiv.className = 'memo-item'
+    memoDiv.innerHTML = `
+      <div class="memo-content">${memo.content}</div>
+      <div class="memo-meta">
+        <span class="memo-timestamp">${formatTimestamp(memo.timestamp)}</span>
+        <div class="memo-actions">
+          <button class="memo-edit-btn" onclick="editMemo(${index})">수정</button>
+          <button class="memo-delete-btn" onclick="deleteMemo(${index})">삭제</button>
+        </div>
+      </div>
+      <div class="memo-edit-form" style="display: none;">
+        <textarea placeholder="메모를 입력하세요...">${memo.content}</textarea>
+        <div class="form-actions">
+          <button class="save-btn" onclick="saveMemoEdit(${index})">저장</button>
+          <button class="cancel-btn" onclick="cancelMemoEdit(${index})">취소</button>
+        </div>
+      </div>
+    `
+    return memoDiv
+  }
+  
+  function formatTimestamp(timestamp) {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diff = now - date
+    
+    if (diff < 60000) { // Less than 1 minute
+      return '방금 전'
+    } else if (diff < 3600000) { // Less than 1 hour
+      return `${Math.floor(diff / 60000)}분 전`
+    } else if (diff < 86400000) { // Less than 1 day
+      return `${Math.floor(diff / 3600000)}시간 전`
+    } else {
+      return date.toLocaleDateString('ko-KR', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+  }
+  
+  function showAddMemoDialog() {
+    const content = prompt('메모를 입력하세요:')
+    if (content && content.trim()) {
+      addMemo(content.trim())
+    }
+  }
+  
+  function addMemo(content) {
+    const memos = JSON.parse(localStorage.getItem('memos') || '[]')
+    const newMemo = {
+      id: Date.now(),
+      content: content,
+      timestamp: new Date().toISOString(),
+      fileUrl: fileSelector.options[fileSelector.selectedIndex]?.value || ''
+    }
+    
+    memos.push(newMemo)
+    localStorage.setItem('memos', JSON.stringify(memos))
+    loadMemos()
+  }
+  
+  function editMemo(index) {
+    const memoItems = document.querySelectorAll('.memo-item')
+    const memoItem = memoItems[index]
+    const editForm = memoItem.querySelector('.memo-edit-form')
+    const content = memoItem.querySelector('.memo-content')
+    
+    content.style.display = 'none'
+    editForm.style.display = 'block'
+    editForm.querySelector('textarea').focus()
+  }
+  
+  function saveMemoEdit(index) {
+    const memos = JSON.parse(localStorage.getItem('memos') || '[]')
+    const memoItems = document.querySelectorAll('.memo-item')
+    const memoItem = memoItems[index]
+    const editForm = memoItem.querySelector('.memo-edit-form')
+    const newContent = editForm.querySelector('textarea').value.trim()
+    
+    if (newContent) {
+      memos[index].content = newContent
+      memos[index].timestamp = new Date().toISOString()
+      localStorage.setItem('memos', JSON.stringify(memos))
+      loadMemos()
+    } else {
+      alert('메모 내용을 입력해주세요.')
+    }
+  }
+  
+  function cancelMemoEdit(index) {
+    const memoItems = document.querySelectorAll('.memo-item')
+    const memoItem = memoItems[index]
+    const editForm = memoItem.querySelector('.memo-edit-form')
+    const content = memoItem.querySelector('.memo-content')
+    
+    editForm.style.display = 'none'
+    content.style.display = 'block'
+  }
+  
+  function deleteMemo(index) {
+    if (confirm('이 메모를 삭제하시겠습니까?')) {
+      const memos = JSON.parse(localStorage.getItem('memos') || '[]')
+      memos.splice(index, 1)
+      localStorage.setItem('memos', JSON.stringify(memos))
+      loadMemos()
+    }
+  }
+  
+  function handleTextSelection(event) {
+    const selection = window.getSelection()
+    const selectedText = selection.toString().trim()
+    
+    if (selectedText.length > 0) {
+      // Show a small tooltip or button near the selection
+      showSelectionMemoButton(selectedText, event)
+    }
+  }
+  
+  function showSelectionMemoButton(selectedText, event) {
+    // Remove existing memo button if any
+    const existingBtn = document.querySelector('.selection-memo-btn')
+    if (existingBtn) {
+      existingBtn.remove()
+    }
+    
+    const button = document.createElement('button')
+    button.className = 'selection-memo-btn'
+    button.textContent = '메모 추가'
+    button.style.cssText = `
+      position: absolute;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    `
+    
+    button.style.left = event.pageX + 'px'
+    button.style.top = (event.pageY - 40) + 'px'
+    
+    button.addEventListener('click', () => {
+      const memoContent = `"${selectedText}"\n\n`
+      const fullMemo = prompt('선택한 텍스트에 대한 메모를 추가하세요:', memoContent)
+      if (fullMemo && fullMemo.trim()) {
+        addMemo(fullMemo.trim())
+      }
+      button.remove()
+    })
+    
+    document.body.appendChild(button)
+    
+    // Remove button after 3 seconds or when clicking elsewhere
+    setTimeout(() => {
+      if (button.parentNode) {
+        button.remove()
+      }
+    }, 3000)
+    
+    document.addEventListener('click', function removeButton(e) {
+      if (!button.contains(e.target)) {
+        button.remove()
+        document.removeEventListener('click', removeButton)
+      }
+    })
+  }
+  
+  // Make functions globally available
+  window.editMemo = editMemo
+  window.deleteMemo = deleteMemo
+  window.saveMemoEdit = saveMemoEdit
+  window.cancelMemoEdit = cancelMemoEdit
 })

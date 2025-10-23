@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메모 - M Book</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Korean Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        .memo-page {
+            min-height: 100vh;
+            background: var(--warm-white);
+            font-family: "Noto Serif KR", "Nanum Myeongjo", "Malgun Gothic", "Georgia", "Times New Roman", serif;
+        }
+        
+        .memo-header {
+            background-color: white;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e1e4e8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .memo-header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1a202c;
+        }
+        
+        .back-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .memo-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .memo-stats {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .memo-stats h3 {
+            margin: 0 0 1rem 0;
+            color: #2d3748;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #007bff;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 0.25rem;
+        }
+        
+        .memo-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .add-memo-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .add-memo-btn:hover {
+            background-color: #1e7e34;
+        }
+        
+        .share-memos-btn {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .share-memos-btn:hover {
+            background-color: #138496;
+        }
+        
+        .clear-memos-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .clear-memos-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .memo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .memo-item {
+            background-color: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+        
+        .memo-item:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+        }
+        
+        .memo-content-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .memo-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #718096;
+            border-top: 1px solid #f1f3f4;
+            padding-top: 1rem;
+        }
+        
+        .memo-timestamp {
+            font-size: 0.85rem;
+        }
+        
+        .memo-actions-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .memo-edit-btn, .memo-delete-btn {
+            background: none;
+            border: 1px solid #e1e4e8;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .memo-edit-btn:hover {
+            background-color: #e3f2fd;
+            color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .memo-delete-btn:hover {
+            background-color: #ffebee;
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .memo-edit-form {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .memo-edit-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .memo-edit-form .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .memo-edit-form button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .memo-edit-form .save-btn {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .memo-edit-form .save-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .memo-edit-form .cancel-btn {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .memo-edit-form .cancel-btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #718096;
+        }
+        
+        .empty-state h3 {
+            margin: 0 0 1rem 0;
+            color: #4a5568;
+        }
+        
+        .empty-state p {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .memo-header {
+                padding: 1rem;
+            }
+            
+            .memo-content {
+                padding: 1rem;
+            }
+            
+            .memo-actions {
+                flex-direction: column;
+            }
+            
+            .memo-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .memo-actions-buttons {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="memo-page">
+        <header class="memo-header">
+            <h1>📝 메모</h1>
+            <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
+        </header>
+        
+        <main class="memo-content">
+            <div class="memo-stats">
+                <h3>메모 통계</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalMemos">0</div>
+                        <div class="stat-label">전체 메모</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="todayMemos">0</div>
+                        <div class="stat-label">오늘 작성</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="thisWeekMemos">0</div>
+                        <div class="stat-label">이번 주</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="memo-actions">
+                <button class="add-memo-btn" onclick="showAddMemoDialog()">+ 새 메모 추가</button>
+                <button class="share-memos-btn" onclick="shareMemosByEmail()">📧 이메일로 공유</button>
+                <button class="clear-memos-btn" onclick="clearAllMemos()">모든 메모 삭제</button>
+            </div>
+            
+            <div id="memoList" class="memo-list"></div>
+        </main>
+    </div>
+    
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+        
+        function loadMemos() {
+            const memos = JSON.parse(localStorage.getItem('memos') || '[]');
+            const memoList = document.getElementById('memoList');
+            
+            memoList.innerHTML = '';
+            
+            if (memos.length === 0) {
+                memoList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>아직 메모가 없습니다</h3>
+                        <p>새 메모를 추가해보세요!</p>
+                    </div>
+                `;
+                updateStats([]);
+                return;
+            }
+            
+            // Sort memos by creation date (newest first)
+            memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            memos.forEach((memo, index) => {
+                const memoElement = createMemoElement(memo, index);
+                memoList.appendChild(memoElement);
+            });
+            
+            updateStats(memos);
+        }
+        
+        function createMemoElement(memo, index) {
+            const memoDiv = document.createElement('div');
+            memoDiv.className = 'memo-item';
+            memoDiv.innerHTML = `
+                <div class="memo-content-text">${memo.content}</div>
+                <div class="memo-meta">
+                    <span class="memo-timestamp">${formatTimestamp(memo.timestamp)}</span>
+                    <div class="memo-actions-buttons">
+                        <button class="memo-edit-btn" onclick="editMemo(${index})">수정</button>
+                        <button class="memo-delete-btn" onclick="deleteMemo(${index})">삭제</button>
+                    </div>
+                </div>
+                <div class="memo-edit-form" style="display: none;">
+                    <textarea placeholder="메모를 입력하세요...">${memo.content}</textarea>
+                    <div class="form-actions">
+                        <button class="save-btn" onclick="saveMemoEdit(${index})">저장</button>
+                        <button class="cancel-btn" onclick="cancelMemoEdit(${index})">취소</button>
+                    </div>
+                </div>
+            `;
+            return memoDiv;
+        }
+        
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) { // Less than 1 minute
+                return '방금 전';
+            } else if (diff < 3600000) { // Less than 1 hour
+                return `${Math.floor(diff / 60000)}분 전`;
+            } else if (diff < 86400000) { // Less than 1 day
+                return `${Math.floor(diff / 3600000)}시간 전`;
+            } else {
+                return date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+        
+        function updateStats(memos) {
+            const totalMemos = memos.length;
+            const today = new Date().toDateString();
+            const todayMemos = memos.filter(memo => 
+                new Date(memo.timestamp).toDateString() === today
+            ).length;
+            
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            const thisWeekMemos = memos.filter(memo => 
+                new Date(memo.timestamp) >= oneWeekAgo
+            ).length;
+            
+            document.getElementById('totalMemos').textContent = totalMemos;
+            document.getElementById('todayMemos').textContent = todayMemos;
+            document.getElementById('thisWeekMemos').textContent = thisWeekMemos;
+        }
+        
+        function showAddMemoDialog() {
+            const content = prompt('메모를 입력하세요:');
+            if (content && content.trim()) {
+                addMemo(content.trim());
+            }
+        }
+        
+        function addMemo(content) {
+            const memos = JSON.parse(localStorage.getItem('memos') || '[]');
+            const newMemo = {
+                id: Date.now(),
+                content: content,
+                timestamp: new Date().toISOString(),
+                fileUrl: ''
+            };
+            
+            memos.push(newMemo);
+            localStorage.setItem('memos', JSON.stringify(memos));
+            loadMemos();
+        }
+        
+        function editMemo(index) {
+            const memoItems = document.querySelectorAll('.memo-item');
+            const memoItem = memoItems[index];
+            const editForm = memoItem.querySelector('.memo-edit-form');
+            const content = memoItem.querySelector('.memo-content-text');
+            
+            content.style.display = 'none';
+            editForm.style.display = 'block';
+            editForm.querySelector('textarea').focus();
+        }
+        
+        function saveMemoEdit(index) {
+            const memos = JSON.parse(localStorage.getItem('memos') || '[]');
+            const memoItems = document.querySelectorAll('.memo-item');
+            const memoItem = memoItems[index];
+            const editForm = memoItem.querySelector('.memo-edit-form');
+            const newContent = editForm.querySelector('textarea').value.trim();
+            
+            if (newContent) {
+                memos[index].content = newContent;
+                memos[index].timestamp = new Date().toISOString();
+                localStorage.setItem('memos', JSON.stringify(memos));
+                loadMemos();
+            } else {
+                alert('메모 내용을 입력해주세요.');
+            }
+        }
+        
+        function cancelMemoEdit(index) {
+            const memoItems = document.querySelectorAll('.memo-item');
+            const memoItem = memoItems[index];
+            const editForm = memoItem.querySelector('.memo-edit-form');
+            const content = memoItem.querySelector('.memo-content-text');
+            
+            editForm.style.display = 'none';
+            content.style.display = 'block';
+        }
+        
+        function deleteMemo(index) {
+            if (confirm('이 메모를 삭제하시겠습니까?')) {
+                const memos = JSON.parse(localStorage.getItem('memos') || '[]');
+                memos.splice(index, 1);
+                localStorage.setItem('memos', JSON.stringify(memos));
+                loadMemos();
+            }
+        }
+        
+        function clearAllMemos() {
+            if (confirm('모든 메모를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                localStorage.removeItem('memos');
+                loadMemos();
+            }
+        }
+        
+        function shareMemosByEmail() {
+            const memos = JSON.parse(localStorage.getItem('memos') || '[]');
+            
+            if (memos.length === 0) {
+                alert('공유할 메모가 없습니다.');
+                return;
+            }
+            
+            // 메모 내용을 이메일 형식으로 포맷팅
+            const emailContent = formatMemosForEmail(memos);
+            
+            // 이메일 클라이언트 열기
+            const subject = encodeURIComponent('M Book 메모 모음');
+            const body = encodeURIComponent(emailContent);
+            const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+            
+            // 새 창에서 이메일 클라이언트 열기
+            window.open(mailtoLink, '_blank');
+        }
+        
+        function formatMemosForEmail(memos) {
+            const currentDate = new Date().toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+            
+            let emailContent = `M Book 메모 모음\n`;
+            emailContent += `생성일: ${currentDate}\n`;
+            emailContent += `총 메모 수: ${memos.length}개\n\n`;
+            emailContent += `========================================\n\n`;
+            
+            // 메모를 날짜별로 그룹화
+            const groupedMemos = groupMemosByDate(memos);
+            
+            Object.keys(groupedMemos).sort().reverse().forEach(date => {
+                emailContent += `📅 ${date}\n`;
+                emailContent += `${'='.repeat(30)}\n\n`;
+                
+                groupedMemos[date].forEach((memo, index) => {
+                    const time = new Date(memo.timestamp).toLocaleTimeString('ko-KR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    emailContent += `${index + 1}. [${time}] ${memo.content}\n\n`;
+                });
+                
+                emailContent += `\n`;
+            });
+            
+            emailContent += `\n========================================\n`;
+            emailContent += `이 메모들은 M Book에서 자동으로 생성되었습니다.\n`;
+            emailContent += `생성 시간: ${new Date().toLocaleString('ko-KR')}`;
+            
+            return emailContent;
+        }
+        
+        function groupMemosByDate(memos) {
+            const grouped = {};
+            
+            memos.forEach(memo => {
+                const date = new Date(memo.timestamp).toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long'
+                });
+                
+                if (!grouped[date]) {
+                    grouped[date] = [];
+                }
+                
+                grouped[date].push(memo);
+            });
+            
+            return grouped;
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMemos();
+        });
+    </script>
+</body>
+</html>

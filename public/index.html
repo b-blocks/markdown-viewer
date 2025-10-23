@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M BOOK</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Korean Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
     <!-- Add highlight.js stylesheet (e.g., Atom One Dark theme) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <!-- Include the 'marked' library from a CDN -->
@@ -20,32 +24,38 @@
                 <label for="fileSelector" style="display: none;">Select a file:</label>
                 <select id="fileSelector" class="file-selector"></select>
             </div>
-            <div class="spacing-controls">
-                <div class="spacing-control-group">
-                    <label for="lineSpacingSlider">줄 간격:</label>
-                    <input type="range" id="lineSpacingSlider" min="1.2" max="2.5" step="0.1" value="1.5">
-                    <span id="lineSpacingValue">1.5</span>
-                </div>
-                <div class="spacing-control-group">
-                    <label for="paragraphSpacingSlider">문단 간격:</label>
-                    <input type="range" id="paragraphSpacingSlider" min="0.8" max="3.0" step="0.1" value="1.5">
-                    <span id="paragraphSpacingValue">1.5rem</span>
-                </div>
-            </div>
         </header>
         <main class="main-content">
             <nav id="toc-panel" class="panel"></nav>
             <article id="content-panel" class="panel"></article>
+            <aside id="memo-panel" class="panel memo-panel">
+                <div class="memo-header">
+                    <h3>메모</h3>
+                    <button id="addMemoBtn" class="add-memo-btn" title="새 메모 추가">+</button>
+                </div>
+                <div id="memoList" class="memo-list"></div>
+            </aside>
         </main>
     </div>
     
     <!-- Floating Auto-Scroll Button -->
     <button id="autoScrollBtn" class="auto-scroll-btn" title="Auto Scroll">
-        <svg class="play-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
         </svg>
-        <svg class="pause-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor"/>
+        </svg>
+    </button>
+    
+    <!-- Floating Memo Button -->
+    <button id="memoBtn" class="memo-btn" title="메모 보기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="10,9 9,9 8,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
     </button>
     
