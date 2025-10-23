@@ -865,8 +865,8 @@ header h1::after {
 /* Auto-Scroll Floating Button */
 .auto-scroll-btn {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 1rem;
+    right: 1rem;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -929,31 +929,6 @@ header h1::after {
     display: block;
 }
 
-/* Pulse animation when scrolling */
-.auto-scroll-btn.scrolling::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid #28a745;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1.5);
-        opacity: 0;
-    }
-}
-
 /* Hide button when at bottom of page */
 .auto-scroll-btn.at-bottom {
     opacity: 0.3;
@@ -963,8 +938,8 @@ header h1::after {
 /* Floating Memo Button */
 .memo-btn {
     position: fixed;
-    bottom: calc(2rem + 56px + 1rem); /* Position above the auto-scroll button */
-    right: 2rem;
+    bottom: calc(1rem + 56px + 1rem); /* Position above the auto-scroll button */
+    right: 1rem;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -998,15 +973,15 @@ header h1::after {
 /* Responsive: smaller button on mobile */
 @media (max-width: 768px) {
     .auto-scroll-btn {
-        bottom: 1.5rem;
-        right: 1.5rem;
+        bottom: 0.75rem;
+        right: 0.75rem;
         width: 48px;
         height: 48px;
     }
     
     .memo-btn {
-        bottom: calc(1.5rem + 48px + 0.75rem); /* Adjust for mobile */
-        right: 1.5rem;
+        bottom: calc(0.75rem + 48px + 0.75rem); /* Adjust for mobile */
+        right: 0.75rem;
         width: 48px;
         height: 48px;
     }
