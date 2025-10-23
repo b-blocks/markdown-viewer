@@ -317,18 +317,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Memo System
   function initMemoSystem() {
-    const addMemoBtn = document.getElementById('addMemoBtn')
-    const memoList = document.getElementById('memoList')
     const memoBtn = document.getElementById('memoBtn')
-    
-    // Load existing memos
-    loadMemos()
-    
-    // Add memo button event listener
-    addMemoBtn.addEventListener('click', () => {
-      showAddMemoDialog()
-    })
-    
+    const contentPanel = document.getElementById('content-panel')
+
     // Floating memo button event listener
     if (memoBtn) {
       memoBtn.addEventListener('click', () => {

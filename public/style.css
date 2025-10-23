@@ -401,6 +401,7 @@ header h1::after {
     padding: 1.5rem;
     max-height: 100vh;
     overflow-y: auto;
+    display: none; /* Always hide the memo panel from the main view */
 }
 
 .memo-header {
@@ -682,7 +683,7 @@ header h1::after {
     padding: 0.3em 0.6em;
     border-radius: 6px;
     font-size: 0.9em;
-    font-family: "Courier New", "Monaco", monospace;
+    font-family: "Consolas", "Courier New", "Monaco", monospace;
     border: 2px solid var(--border-orange);
     box-shadow: 
         0 2px 4px var(--shadow-warm),
@@ -727,6 +728,7 @@ header h1::after {
     border: none;
     font-size: 0.95rem;
     font-weight: 500;
+    font-family: "Consolas", "Courier New", "Monaco", monospace;
     text-shadow: 0.25px 0.25px 0.5px rgba(0, 0, 0, 0.1);
 }
 
@@ -982,8 +984,8 @@ header h1::after {
 /* Floating Memo Button */
 .memo-btn {
     position: fixed;
-    bottom: 2rem;
-    left: 2rem;
+    bottom: calc(2rem + 56px + 1rem); /* Position above the auto-scroll button */
+    right: 2rem;
     width: 56px;
     height: 56px;
     border-radius: 50%;
@@ -1024,8 +1026,8 @@ header h1::after {
     }
     
     .memo-btn {
-        bottom: 1.5rem;
-        left: 1.5rem;
+        bottom: calc(1.5rem + 48px + 0.75rem); /* Adjust for mobile */
+        right: 1.5rem;
         width: 48px;
         height: 48px;
     }
