@@ -101,7 +101,7 @@ header h1::after {
         border-right: none;
         border-bottom: 1px solid #e1e4e8;
         padding: 1rem;
-        max-height: 300px; /* Limit TOC height on mobile (200px * 1.5) */
+        max-height: 500px; /* Limit TOC height on mobile (200px * 1.5) */
         overflow-y: auto;
     }
     
