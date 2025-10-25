@@ -10,303 +10,292 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
-        .memo-page {
-            min-height: 100vh;
-            background: var(--warm-white);
-            font-family: "Noto Serif KR", "Nanum Myeongjo", "Malgun Gothic", "Georgia", "Times New Roman", serif;
+        :root {
+            --primary-orange: #f59e0b; /* amber-500 */
+            --primary-orange-dark: #d97706; /* amber-600 */
+            --primary-orange-light: #fef3c7; /* amber-100 */
+            --danger-red: #dc3545;
+            --danger-red-light: #ffebee;
         }
-        
-        .memo-header {
-            background-color: white;
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid #e1e4e8;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+
+        body {
+            background-color: var(--bg-color, #fdfaf6);
+        }
+
+        header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color, #e5e7eb);
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
         }
-        
-        .memo-header h1 {
+
+        header h1 {
             margin: 0;
             font-size: 1.75rem;
             font-weight: 600;
-            color: #1a202c;
+            color: var(--text-color, #1f2937);
         }
-        
+
         .back-btn {
-            background-color: #007bff;
+            background-color: var(--primary-orange);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.9rem;
+            font-weight: 500;
             transition: background-color 0.2s;
         }
-        
+
         .back-btn:hover {
-            background-color: #0056b3;
+            background-color: var(--primary-orange-dark);
         }
-        
-        .memo-content {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
+
+        .main-content {
+            padding: 2rem 0;
         }
-        
+
         .memo-stats {
             background-color: white;
             padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color, #e5e7eb);
         }
-        
+
         .memo-stats h3 {
             margin: 0 0 1rem 0;
-            color: #2d3748;
+            color: var(--text-color-light, #4b5563);
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 1rem;
         }
-        
+
         .stat-item {
             text-align: center;
             padding: 1rem;
-            background-color: #f8f9fa;
+            background-color: var(--bg-color-offset, #f9fafb);
             border-radius: 6px;
         }
-        
+
         .stat-number {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #007bff;
+            color: var(--primary-orange-dark);
         }
-        
+
         .stat-label {
             font-size: 0.9rem;
-            color: #718096;
+            color: var(--text-color-lighter, #6b7280);
             margin-top: 0.25rem;
         }
-        
+
         .memo-actions {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
+            flex-direction: column;
         }
-        
+
         .memo-actions button {
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.375rem 1.5rem;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
-            min-width: 160px; /* Ensure all buttons have the same minimum width */
             transition: background-color 0.2s;
+            min-width: 150px;
         }
-        
+
+
         .add-memo-btn {
             background-color: #28a745;
         }
-        
+
         .add-memo-btn:hover {
             background-color: #1e7e34;
         }
-        
+
         .share-memos-btn {
-            background-color: #17a2b8;
+            background-color: var(--primary-orange);
         }
-        
+
         .share-memos-btn:hover {
-            background-color: #138496;
+            background-color: var(--primary-orange-dark);
         }
-        
+
         .clear-memos-btn {
-            background-color: #dc3545;
+            background-color: var(--danger-red);
         }
-        
+
         .clear-memos-btn:hover {
             background-color: #c82333;
         }
-        
+
         .memo-list {
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
-        
+
         .memo-item {
             background-color: white;
-            border: 1px solid #e1e4e8;
+            border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 8px;
             padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
         }
-        
+
         .memo-item:hover {
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
             transform: translateY(-1px);
         }
-        
+
         .memo-content-text {
             font-size: 1rem;
             line-height: 1.6;
-            color: #2c3e50;
+            color: var(--text-color, #1f2937);
             margin-bottom: 1rem;
             word-wrap: break-word;
             white-space: pre-wrap;
         }
-        
+
         .memo-meta {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
             font-size: 0.9rem;
-            color: #718096;
-            border-top: 1px solid #f1f3f4;
+            color: var(--text-color-lighter, #6b7280);
+            border-top: 1px solid var(--border-color-light, #f3f4f6);
             padding-top: 1rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
         }
-        
+
         .memo-timestamp {
             font-size: 0.85rem;
         }
-        
+
         .memo-actions-buttons {
             display: flex;
             gap: 0.5rem;
+            width: 100%;
+            justify-content: flex-end;
         }
-        
+
         .memo-edit-btn, .memo-delete-btn {
             background: none;
-            border: 1px solid #e1e4e8;
+            border: 1px solid var(--border-color, #e5e7eb);
             cursor: pointer;
             padding: 0.5rem 1rem;
             border-radius: 4px;
             transition: all 0.2s;
             font-size: 0.9rem;
         }
-        
+
         .memo-edit-btn:hover {
-            background-color: #e3f2fd;
-            color: #007bff;
-            border-color: #007bff;
+            background-color: var(--primary-orange-light);
+            color: var(--primary-orange-dark);
+            border-color: var(--primary-orange);
         }
-        
+
         .memo-delete-btn:hover {
-            background-color: #ffebee;
-            color: #dc3545;
-            border-color: #dc3545;
+            background-color: var(--danger-red-light);
+            color: var(--danger-red);
+            border-color: var(--danger-red);
         }
-        
+
         .memo-edit-form {
             display: none;
             margin-top: 1rem;
             padding: 1rem;
-            background-color: #f8f9fa;
+            background-color: var(--bg-color-offset, #f9fafb);
             border-radius: 6px;
         }
-        
+
         .memo-edit-form textarea {
             width: 100%;
             min-height: 100px;
             padding: 0.75rem;
-            border: 1px solid #e1e4e8;
+            border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 4px;
             font-size: 1rem;
             resize: vertical;
             font-family: inherit;
         }
-        
+
         .memo-edit-form .form-actions {
             display: flex;
             gap: 0.75rem;
             margin-top: 1rem;
         }
-        
+
         .memo-edit-form button {
             padding: 0.5rem 1rem;
-            border: 1px solid #e1e4e8;
+            border: 1px solid transparent;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.2s;
         }
-        
+
         .memo-edit-form .save-btn {
-            background-color: #007bff;
+            background-color: var(--primary-orange);
             color: white;
-            border-color: #007bff;
         }
-        
+
         .memo-edit-form .save-btn:hover {
-            background-color: #0056b3;
+            background-color: var(--primary-orange-dark);
         }
-        
+
         .memo-edit-form .cancel-btn {
-            background-color: #f8f9fa;
-            color: #6c757d;
+            background-color: white;
+            color: var(--text-color-lighter, #6b7280);
+            border-color: var(--border-color, #e5e7eb);
         }
-        
+
         .memo-edit-form .cancel-btn:hover {
-            background-color: #e9ecef;
+            background-color: var(--bg-color-offset, #f9fafb);
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
-            color: #718096;
+            color: var(--text-color-lighter, #6b7280);
+            background-color: white;
+            border: 1px dashed var(--border-color, #e5e7eb);
+            border-radius: 8px;
         }
-        
+
         .empty-state h3 {
             margin: 0 0 1rem 0;
-            color: #4a5568;
+            color: var(--text-color-light, #4b5563);
         }
-        
+
         .empty-state p {
             margin: 0;
             font-size: 1.1rem;
         }
-        
-        @media (max-width: 768px) {
-            .memo-header {
-                padding: 1rem;
-            }
-            
-            .memo-content {
-                padding: 1rem;
-            }
-            
-            .memo-actions {
-                flex-direction: column;
-            }
-            
-            .memo-meta {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-            
-            .memo-actions-buttons {
-                width: 100%;
-                justify-content: flex-end;
-            }
-        }
+
     </style>
 </head>
 <body>
-    <div class="memo-page">
-        <header class="memo-header">
+    <div class="container">
+        <header>
             <h1>📝 메모</h1>
             <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
         </header>
-        
-        <main class="memo-content">
+
+        <main class="main-content">
             <div class="memo-stats">
                 <h3>메모 통계</h3>
                 <div class="stats-grid">
