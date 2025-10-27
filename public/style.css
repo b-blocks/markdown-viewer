@@ -711,6 +711,14 @@ header h1::after {
   /* Removed text-shadow for better performance */
 }
 
+/* Style for code blocks without a specified language */
+#content-panel pre code:not(.hljs) {
+  background-color: #000000; /* Black background */
+  color: #ffffff;           /* White text */
+  display: block;            /* Ensure it takes up the full block */
+  padding: 2rem;             /* Match the padding of the <pre> tag */
+}
+
 #content-panel blockquote {
     border-left: 5px solid var(--hermes-orange);
     margin: 2rem 0;

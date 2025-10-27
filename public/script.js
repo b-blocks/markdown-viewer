@@ -1,5 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   const fileSelector = document.getElementById('fileSelector')
+
+  // Inject custom styles to handle code block wrapping
+  const style = document.createElement('style')
+  style.textContent = `
+    pre code {
+      white-space: pre-wrap !important; /* Preserve whitespace and wrap lines */
+      word-break: break-all;       /* Break long words to prevent overflow */
+    }
+  `
+  document.head.appendChild(style)
+
   // 전체 페이지의 기본 글씨 크기를 10% 줄입니다.
   document.body.style.fontSize = '70%'
   // 전체 페이지의 기본 줄 간격을 약 10% 줄입니다. (기본값 1.5 기준)
@@ -79,43 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Intersection Observer for lazy syntax highlighting
-  let highlightObserver = null
-  let observedElements = new Set() // Track observed elements for cleanup
-
-  function initHighlightObserver () {
-    // Clean up previous observer and elements
-    if (highlightObserver) {
-      highlightObserver.disconnect()
-      observedElements.clear()
-    }
-
-    highlightObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const codeBlock = entry.target
-          if (!codeBlock.dataset.highlighted) {
-            hljs.highlightElement(codeBlock)
-            codeBlock.dataset.highlighted = 'true'
-            highlightObserver.unobserve(codeBlock)
-            observedElements.delete(codeBlock) // Remove from tracking
-          }
-        }
-      })
-    }, {
-      rootMargin: '50px' // Start highlighting slightly before it comes into view
-    })
-  }
-
-  // Cleanup function for memory management
-  function cleanupHighlightObserver() {
-    if (highlightObserver) {
-      highlightObserver.disconnect()
-      highlightObserver = null
-    }
-    observedElements.clear()
-  }
-
   // Debouncing utility
   function debounce(func, wait) {
     let timeout
@@ -186,9 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Stop auto-scroll when loading new content
     stopAutoScroll()
 
-    // Cleanup previous observers and listeners
-    cleanupHighlightObserver()
-
     // Clear previous content
     contentPanel.innerHTML = '<div class="loading-spinner"><p>Loading markdown file...</p><div class="spinner"></div></div>'
     tocPanel.innerHTML = ''
@@ -214,33 +185,25 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(() => {
         const renderStart = performance.now()
 
+        // Configure marked.js to use highlight.js for syntax highlighting,
+        // but only when a language is specified.
+        marked.setOptions({
+          highlight: function (code, lang) {
+            // If a language is specified and supported by highlight.js, highlight it.
+            if (lang && hljs.getLanguage(lang)) {
+              return hljs.highlight(code, { language: lang, ignoreIllegals: true }).value
+            }
+            // Otherwise, just return the code with HTML escaped, without highlighting.
+            // This prevents content truncation issues with large, un-languaged code blocks.
+            return code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          }
+        })
+
         // Render markdown to HTML (marked.js is quite fast)
         contentPanel.innerHTML = marked.parse(markdown)
 
         const renderTime = performance.now() - renderStart
         console.log(`Rendered HTML in ${renderTime.toFixed(2)}ms`)
-
-        // Initialize intersection observer for lazy highlighting
-        initHighlightObserver()
-
-        // Set up lazy syntax highlighting for code blocks
-        const codeBlocks = contentPanel.querySelectorAll('pre code')
-        console.log(`Found ${codeBlocks.length} code blocks`)
-
-        if (codeBlocks.length > 0) {
-          // Highlight the first few visible code blocks immediately
-          const immediateHighlight = Math.min(5, codeBlocks.length)
-          for (let i = 0; i < immediateHighlight; i++) {
-            hljs.highlightElement(codeBlocks[i])
-            codeBlocks[i].dataset.highlighted = 'true'
-          }
-
-          // Set up lazy loading for the rest
-          for (let i = immediateHighlight; i < codeBlocks.length; i++) {
-            highlightObserver.observe(codeBlocks[i])
-            observedElements.add(codeBlocks[i]) // Track for cleanup
-          }
-        }
 
         // Generate Table of Contents
         generateToc()
@@ -271,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cleanup on page unload
   window.addEventListener('beforeunload', () => {
-    cleanupHighlightObserver()
     cleanupMemoSystem()
     
     // Clear any remaining timeouts
