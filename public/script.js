@@ -74,10 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Intersection Observer for lazy syntax highlighting
   let highlightObserver = null
+  let observedElements = new Set() // Track observed elements for cleanup
 
   function initHighlightObserver () {
+    // Clean up previous observer and elements
     if (highlightObserver) {
       highlightObserver.disconnect()
+      observedElements.clear()
     }
 
     highlightObserver = new IntersectionObserver((entries) => {
@@ -88,12 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
             hljs.highlightElement(codeBlock)
             codeBlock.dataset.highlighted = 'true'
             highlightObserver.unobserve(codeBlock)
+            observedElements.delete(codeBlock) // Remove from tracking
           }
         }
       })
     }, {
       rootMargin: '50px' // Start highlighting slightly before it comes into view
     })
+  }
+
+  // Cleanup function for memory management
+  function cleanupHighlightObserver() {
+    if (highlightObserver) {
+      highlightObserver.disconnect()
+      highlightObserver = null
+    }
+    observedElements.clear()
   }
 
   async function loadMarkdown (url) {
@@ -108,6 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof stopAutoScroll !== 'undefined') {
       stopAutoScroll()
     }
+
+    // Cleanup previous observers and listeners
+    cleanupHighlightObserver()
 
     // Clear previous content
     contentPanel.innerHTML = '<div class="loading-spinner"><p>Loading markdown file...</p><div class="spinner"></div></div>'
@@ -158,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Set up lazy loading for the rest
           for (let i = immediateHighlight; i < codeBlocks.length; i++) {
             highlightObserver.observe(codeBlocks[i])
+            observedElements.add(codeBlocks[i]) // Track for cleanup
           }
         }
 
@@ -179,6 +196,17 @@ document.addEventListener('DOMContentLoaded', () => {
   populateFileSelector()
   initMemoSystem()
 
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', () => {
+    cleanupHighlightObserver()
+    cleanupMemoSystem()
+    
+    // Clear any remaining timeouts
+    if (autoScrollAnimationId) {
+      cancelAnimationFrame(autoScrollAnimationId)
+    }
+  })
+
 
   function generateToc () {
     const headings = contentPanel.querySelectorAll('h1, h2, h3, h4, h5, h6')
@@ -187,8 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return
     }
 
+    // Use DocumentFragment for batch DOM operations
+    const fragment = document.createDocumentFragment()
     const tocList = document.createElement('ul')
 
+    // Process headings in batch
+    const tocItems = []
     headings.forEach((heading, index) => {
       const level = parseInt(heading.tagName.substring(1), 10)
 
@@ -211,10 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
       link.classList.add(`toc-level-${level}`) // Add class for styling
 
       tocItem.appendChild(link)
-      tocList.appendChild(tocItem)
+      tocItems.push(tocItem)
     })
 
-    tocPanel.appendChild(tocList)
+    // Batch append all items at once
+    tocItems.forEach(item => tocList.appendChild(item))
+    fragment.appendChild(tocList)
+    
+    // Single DOM update
+    tocPanel.innerHTML = ''
+    tocPanel.appendChild(fragment)
   }
 
   // Make tables responsive for mobile
@@ -241,7 +279,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let autoScrollAnimationId = null
   let isAutoScrolling = false
   const autoScrollBtn = document.getElementById('autoScrollBtn')
-  const scrollSpeed = 1 // pixels per frame (adjust for faster/slower scrolling)
+  const scrollSpeed = 3 // pixels per frame (increased for better performance)
+  const scrollThrottle = 16 // ~60fps throttling
+  let lastScrollTime = 0
+  let scrollAccumulator = 0
 
   // Cross-browser compatible scroll position getter
   function getScrollTop() {
@@ -277,9 +318,20 @@ document.addEventListener('DOMContentLoaded', () => {
     isAutoScrolling = true
     autoScrollBtn.classList.add('scrolling')
     autoScrollBtn.title = 'Stop Auto Scroll'
+    lastScrollTime = performance.now()
+    scrollAccumulator = 0
 
     function autoScrollFrame() {
       if (!isAutoScrolling) return
+
+      const now = performance.now()
+      const deltaTime = now - lastScrollTime
+      
+      // Throttle to ~60fps
+      if (deltaTime < scrollThrottle) {
+        autoScrollAnimationId = requestAnimationFrame(autoScrollFrame)
+        return
+      }
 
       const currentScroll = getScrollTop()
       const maxScroll = getMaxScroll()
@@ -291,8 +343,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return
       }
 
-      // Use requestAnimationFrame for smoother scrolling
-      setScrollTop(currentScroll + scrollSpeed)
+      // Batch scroll updates - accumulate scroll distance
+      scrollAccumulator += scrollSpeed
+      
+      // Only update DOM when we have accumulated enough scroll
+      if (scrollAccumulator >= 1) {
+        const scrollAmount = Math.floor(scrollAccumulator)
+        setScrollTop(currentScroll + scrollAmount)
+        scrollAccumulator -= scrollAmount
+      }
+
+      lastScrollTime = now
       autoScrollAnimationId = requestAnimationFrame(autoScrollFrame)
     }
 
@@ -321,18 +382,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Debouncing utility
+  function debounce(func, wait) {
+    let timeout
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout)
+        func(...args)
+      }
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+    }
+  }
+
+  // Throttling utility
+  function throttle(func, limit) {
+    let inThrottle
+    return function() {
+      const args = arguments
+      const context = this
+      if (!inThrottle) {
+        func.apply(context, args)
+        inThrottle = true
+        setTimeout(() => inThrottle = false, limit)
+      }
+    }
+  }
+
   // Event listeners for auto-scroll button
   autoScrollBtn.addEventListener('click', toggleAutoScroll)
 
-  // Stop auto-scroll if user manually scrolls
-  window.addEventListener('wheel', () => {
-    if (isAutoScrolling) {
-      stopAutoScroll()
-    }
-  }, { passive: true })
-
-  // Check if at bottom and update button state
-  window.addEventListener('scroll', () => {
+  // Unified scroll handler with debouncing
+  const handleScroll = debounce(() => {
     const currentScroll = getScrollTop()
     const maxScroll = getMaxScroll()
 
@@ -344,29 +425,57 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       autoScrollBtn.classList.remove('at-bottom')
     }
+  }, 16) // ~60fps
+
+  // Stop auto-scroll if user manually scrolls (throttled)
+  const handleUserScroll = throttle(() => {
+    if (isAutoScrolling) {
+      stopAutoScroll()
+    }
+  }, 100)
+
+  // Single scroll event listener
+  window.addEventListener('scroll', () => {
+    handleScroll()
+    handleUserScroll()
   }, { passive: true })
 
+  // Wheel event for immediate response
+  window.addEventListener('wheel', handleUserScroll, { passive: true })
+
   // Memo System
+  let memoEventListeners = new Map() // Track event listeners for cleanup
+
   function initMemoSystem() {
     const memoBtn = document.getElementById('memoBtn')
     const contentPanel = document.getElementById('content-panel')
 
     // Floating memo button event listener
     if (memoBtn) {
-      memoBtn.addEventListener('click', () => {
+      const memoBtnHandler = () => {
         window.location.href = 'memos.html'
-      })
+      }
+      memoBtn.addEventListener('click', memoBtnHandler)
+      memoEventListeners.set(memoBtn, { event: 'click', handler: memoBtnHandler })
     }
     
     // Text selection for memo creation
-    contentPanel.addEventListener('mouseup', handleTextSelection)
+    const textSelectionHandler = handleTextSelection
+    contentPanel.addEventListener('mouseup', textSelectionHandler)
+    memoEventListeners.set(contentPanel, { event: 'mouseup', handler: textSelectionHandler })
+  }
+
+  // Cleanup function for memo system
+  function cleanupMemoSystem() {
+    memoEventListeners.forEach((listener, element) => {
+      element.removeEventListener(listener.event, listener.handler)
+    })
+    memoEventListeners.clear()
   }
   
   function loadMemos() {
     const memos = JSON.parse(localStorage.getItem('memos') || '[]')
     const memoList = document.getElementById('memoList')
-    
-    memoList.innerHTML = ''
     
     if (memos.length === 0) {
       memoList.innerHTML = '<p style="color: #718096; text-align: center; font-style: italic;">아직 메모가 없습니다.</p>'
@@ -376,10 +485,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sort memos by creation date (newest first)
     memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     
+    // Use DocumentFragment for batch DOM operations
+    const fragment = document.createDocumentFragment()
+    
     memos.forEach((memo, index) => {
       const memoElement = createMemoElement(memo, index)
-      memoList.appendChild(memoElement)
+      fragment.appendChild(memoElement)
     })
+    
+    // Single DOM update
+    memoList.innerHTML = ''
+    memoList.appendChild(fragment)
   }
   
   function createMemoElement(memo, index) {
@@ -511,49 +627,48 @@ document.addEventListener('DOMContentLoaded', () => {
       existingBtn.remove()
     }
     
+    // Use DocumentFragment for better performance
+    const fragment = document.createDocumentFragment()
     const button = document.createElement('button')
     button.className = 'selection-memo-btn'
     button.textContent = '메모 추가'
-    button.style.cssText = `
-      position: absolute;
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    `
     
+    // Use CSS classes instead of inline styles for better performance
+    button.classList.add('selection-memo-btn-style')
     button.style.left = event.pageX + 'px'
     button.style.top = (event.pageY - 40) + 'px'
     
-    button.addEventListener('click', () => {
+    // Debounced click handler
+    const debouncedClickHandler = debounce(() => {
       const memoContent = `"${selectedText}"\n\n`
       const fullMemo = prompt('선택한 텍스트에 대한 메모를 추가하세요:', memoContent)
       if (fullMemo && fullMemo.trim()) {
         addMemo(fullMemo.trim())
       }
       button.remove()
-    })
+    }, 100)
     
-    document.body.appendChild(button)
+    button.addEventListener('click', debouncedClickHandler)
+    
+    fragment.appendChild(button)
+    document.body.appendChild(fragment)
     
     // Remove button after 3 seconds or when clicking elsewhere
-    setTimeout(() => {
+    const removeTimeout = setTimeout(() => {
       if (button.parentNode) {
         button.remove()
       }
     }, 3000)
     
-    document.addEventListener('click', function removeButton(e) {
+    const removeButtonHandler = (e) => {
       if (!button.contains(e.target)) {
         button.remove()
-        document.removeEventListener('click', removeButton)
+        clearTimeout(removeTimeout)
+        document.removeEventListener('click', removeButtonHandler)
       }
-    })
+    }
+    
+    document.addEventListener('click', removeButtonHandler)
   }
   
   // Make functions globally available
