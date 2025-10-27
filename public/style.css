@@ -672,9 +672,9 @@ header h1::after {
 }
 
 #content-panel a:hover {
-    color: var(--dark-orange);
-    border-bottom-color: var(--hermes-orange);
-    text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.1);
+  color: var(--dark-orange);
+  border-bottom-color: var(--hermes-orange);
+  /* Removed text-shadow for better performance */
 }
 
 #content-panel code {
@@ -701,14 +701,14 @@ header h1::after {
 }
 
 #content-panel pre code {
-    background-color: transparent;
-    color: #f1c40f; /* Set base text color to yellow */
-    padding: 0;
-    border: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    font-family: "Consolas", "Courier New", "Monaco", monospace;
-    text-shadow: 0.25px 0.25px 0.5px rgba(0, 0, 0, 0.1);
+  background-color: transparent;
+  color: #f1c40f; /* Set base text color to yellow */
+  padding: 0;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: "Consolas", "Courier New", "Monaco", monospace;
+  /* Removed text-shadow for better performance */
 }
 
 #content-panel blockquote {
@@ -790,10 +790,9 @@ header h1::after {
 }
 
 #content-panel img:hover {
-    transform: scale(1.02);
-    box-shadow: 
-        0 12px 35px var(--shadow-warm),
-        0 0 0 3px var(--hermes-orange);
+  transform: scale(1.02);
+  /* Simplified box-shadow for better performance */
+  box-shadow: 0 8px 25px var(--shadow-warm);
 }
 
 #content-panel hr {
@@ -858,8 +857,8 @@ header h1::after {
 
 /* Performance optimization: reduce repaints during scroll */
 #content-panel pre code {
-    will-change: auto;
-    contain: layout style paint;
+  contain: layout style;
+  /* Removed will-change to prevent unnecessary GPU layer creation */
 }
 
 /* Auto-Scroll Floating Button */
@@ -886,11 +885,9 @@ header h1::after {
 }
 
 .auto-scroll-btn:hover {
-    transform: translateY(-3px) scale(1.08);
-    box-shadow: 
-        0 8px 25px var(--shadow-warm),
-        0 0 0 3px var(--warm-white),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-3px) scale(1.08);
+  /* Simplified box-shadow for better performance */
+  box-shadow: 0 8px 25px var(--shadow-warm);
 }
 
 .auto-scroll-btn:active {
@@ -959,30 +956,48 @@ header h1::after {
 }
 
 .memo-btn:hover {
-    transform: translateY(-3px) scale(1.08);
-    box-shadow: 
-        0 8px 25px var(--shadow-warm),
-        0 0 0 3px var(--warm-white),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transform: translateY(-3px) scale(1.08);
+  /* Simplified box-shadow for better performance */
+  box-shadow: 0 8px 25px var(--shadow-warm);
 }
 
 .memo-btn:active {
     transform: translateY(0) scale(0.95);
 }
 
+/* Selection memo button styles */
+.selection-memo-btn-style {
+  position: absolute;
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+
+.selection-memo-btn-style:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
 /* Responsive: smaller button on mobile */
 @media (max-width: 768px) {
-    .auto-scroll-btn {
-        bottom: 0.75rem;
-        right: 0.75rem;
-        width: 48px;
-        height: 48px;
-    }
-    
-    .memo-btn {
-        bottom: calc(0.75rem + 48px + 0.75rem); /* Adjust for mobile */
-        right: 0.75rem;
-        width: 48px;
-        height: 48px;
-    }
+  .auto-scroll-btn {
+    bottom: 0.75rem;
+    right: 0.75rem;
+    width: 48px;
+    height: 48px;
+  }
+  
+  .memo-btn {
+    bottom: calc(0.75rem + 48px + 0.75rem); /* Adjust for mobile */
+    right: 0.75rem;
+    width: 48px;
+    height: 48px;
+  }
 }
