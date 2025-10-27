@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>메모 - M Book</title>
+    <title>메모 - BB</title>
     <link rel="stylesheet" href="style.css">
     <!-- Korean Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -507,7 +507,7 @@
             const emailContent = formatMemosForEmail(memos);
             
             // 이메일 클라이언트 열기
-            const subject = encodeURIComponent('M Book 메모 모음');
+            const subject = encodeURIComponent('BB 메모 모음');
             const body = encodeURIComponent(emailContent);
             const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
             
@@ -523,7 +523,7 @@
                 weekday: 'long'
             });
             
-            let emailContent = `M Book 메모 모음\n`;
+            let emailContent = `BB 메모 모음\n`;
             emailContent += `생성일: ${currentDate}\n`;
             emailContent += `총 메모 수: ${memos.length}개\n\n`;
             emailContent += `========================================\n\n`;
@@ -548,7 +548,7 @@
             });
             
             emailContent += `\n========================================\n`;
-            emailContent += `이 메모들은 M Book에서 자동으로 생성되었습니다.\n`;
+            emailContent += `이 메모들은 BB에서 자동으로 생성되었습니다.\n`;
             emailContent += `생성 시간: ${new Date().toLocaleString('ko-KR')}`;
             
             return emailContent;

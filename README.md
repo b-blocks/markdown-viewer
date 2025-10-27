@@ -1,4 +1,4 @@
-# M Book
+# BB (B Blocks)
 
 A simple web service to view markdown files from raw GitHub links with a table of contents.
 

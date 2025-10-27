@@ -5,6 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 전체 페이지의 기본 줄 간격을 약 10% 줄입니다. (기본값 1.5 기준)
   document.body.style.lineHeight = '1'
 
+  // Auto-scroll related variables, declared early to prevent TDZ issues
+  let autoScrollAnimationId = null
+  let isAutoScrolling = false
+
+  // Memo system variables, declared early
+  let memoEventListeners = new Map() // Track event listeners for cleanup
+
   const fileSelectorContainer = document.getElementById('file-selector-container')
   const tocPanel = document.getElementById('toc-panel')
   const contentPanel = document.getElementById('content-panel')
@@ -109,6 +116,62 @@ document.addEventListener('DOMContentLoaded', () => {
     observedElements.clear()
   }
 
+  // Debouncing utility
+  function debounce(func, wait) {
+    let timeout
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout)
+        func(...args)
+      }
+      clearTimeout(timeout)
+      timeout = setTimeout(later, wait)
+    }
+  }
+
+  // Throttling utility
+  function throttle(func, limit) {
+    let inThrottle
+    return function() {
+      const args = arguments
+      const context = this
+      if (!inThrottle) {
+        func.apply(context, args)
+        inThrottle = true
+        setTimeout(() => inThrottle = false, limit)
+      }
+    }
+  }
+
+  // --- SCROLL HANDLERS ---
+  // These are declared here because they are used by loadMarkdown
+
+  // Unified scroll handler with debouncing
+  const handleScroll = debounce(() => {
+    const currentScroll = getScrollTop()
+    const maxScroll = getMaxScroll()
+
+    if (currentScroll >= maxScroll - 10) {
+      if (isAutoScrolling) {
+        stopAutoScroll()
+      }
+      autoScrollBtn.classList.add('at-bottom')
+    } else {
+      autoScrollBtn.classList.remove('at-bottom')
+    }
+  }, 16) // ~60fps
+
+  // Stop auto-scroll if user manually scrolls with the wheel
+  const handleWheelScroll = () => {
+    if (isAutoScrolling) {
+      stopAutoScroll()
+    }
+  }
+
+  const handleUnifiedScroll = () => {
+    handleScroll()
+  }
+
   async function loadMarkdown (url) {
     if (!url && fileSelector.options.length > 0) {
       url = fileSelector.value
@@ -117,10 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return
     }
 
+    // Temporarily disable scroll handling to prevent race conditions during content replacement
+    window.removeEventListener('scroll', handleUnifiedScroll)
+
     // Stop auto-scroll when loading new content
-    if (typeof stopAutoScroll !== 'undefined') {
-      stopAutoScroll()
-    }
+    stopAutoScroll()
 
     // Cleanup previous observers and listeners
     cleanupHighlightObserver()
@@ -186,6 +250,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalTime = performance.now() - startTime
         console.log(`Total load time: ${totalTime.toFixed(2)}ms`)
+
+        // Re-enable scroll handling after content is fully loaded and rendered
+        window.addEventListener('scroll', handleUnifiedScroll, { passive: true })
+
+        // Explicitly reset scroll position and update button state to avoid race conditions
+        requestAnimationFrame(() => {
+          window.scrollTo(0, 0)
+          handleScroll()
+        })
       })
     } catch (error) {
       contentPanel.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`
@@ -276,10 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auto-scroll functionality
-  let autoScrollAnimationId = null
-  let isAutoScrolling = false
   const autoScrollBtn = document.getElementById('autoScrollBtn')
-  const scrollSpeed = 3 // pixels per frame (increased for better performance)
+  const scrollSpeed = 1 // pixels per frame (increased for better performance)
   const scrollThrottle = 16 // ~60fps throttling
   let lastScrollTime = 0
   let scrollAccumulator = 0
@@ -382,69 +453,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Debouncing utility
-  function debounce(func, wait) {
-    let timeout
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout)
-        func(...args)
-      }
-      clearTimeout(timeout)
-      timeout = setTimeout(later, wait)
-    }
-  }
-
-  // Throttling utility
-  function throttle(func, limit) {
-    let inThrottle
-    return function() {
-      const args = arguments
-      const context = this
-      if (!inThrottle) {
-        func.apply(context, args)
-        inThrottle = true
-        setTimeout(() => inThrottle = false, limit)
-      }
-    }
-  }
-
   // Event listeners for auto-scroll button
   autoScrollBtn.addEventListener('click', toggleAutoScroll)
 
-  // Unified scroll handler with debouncing
-  const handleScroll = debounce(() => {
-    const currentScroll = getScrollTop()
-    const maxScroll = getMaxScroll()
-
-    if (currentScroll >= maxScroll - 10) {
-      if (isAutoScrolling) {
-        stopAutoScroll()
-      }
-      autoScrollBtn.classList.add('at-bottom')
-    } else {
-      autoScrollBtn.classList.remove('at-bottom')
-    }
-  }, 16) // ~60fps
-
-  // Stop auto-scroll if user manually scrolls (throttled)
-  const handleUserScroll = throttle(() => {
-    if (isAutoScrolling) {
-      stopAutoScroll()
-    }
-  }, 100)
-
   // Single scroll event listener
-  window.addEventListener('scroll', () => {
-    handleScroll()
-    handleUserScroll()
-  }, { passive: true })
-
+  window.addEventListener('scroll', handleUnifiedScroll, { passive: true }) // This now only handles the button state
+  
   // Wheel event for immediate response
-  window.addEventListener('wheel', handleUserScroll, { passive: true })
+  window.addEventListener('wheel', handleWheelScroll, { passive: true })
 
   // Memo System
-  let memoEventListeners = new Map() // Track event listeners for cleanup
 
   function initMemoSystem() {
     const memoBtn = document.getElementById('memoBtn')
