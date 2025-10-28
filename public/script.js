@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     pre code {
       white-space: pre-wrap !important; /* Preserve whitespace and wrap lines */
       word-break: break-all;       /* Break long words to prevent overflow */
+      display: block;              /* Make it a block to apply max-height and overflow */
+      max-height: 7.5em;           /* Limit to approximately 5 lines (assuming ~1.5em line-height) */
+      overflow-y: auto;            /* Enable vertical scrolling */
     }
   `
   document.head.appendChild(style)
