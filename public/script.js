@@ -12,10 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
       overflow-y: auto;            /* Enable vertical scrolling */
     }
   `
+  // Add styles to make the content panel wider on mobile (edge-to-edge)
+  style.textContent += `
+    @media (max-width: 768px) {
+      #content-panel {
+        max-width: none; /* Remove max-width limit */
+        padding-left: 5px;  /* Minimize side padding */
+        padding-right: 5px; /* Minimize side padding */
+      }
+    }
+  `
   document.head.appendChild(style)
 
   // 전체 페이지의 기본 글씨 크기를 10% 줄입니다.
-  document.body.style.fontSize = '70%'
+  document.body.style.fontSize = '65%'
   // 전체 페이지의 기본 줄 간격을 약 10% 줄입니다. (기본값 1.5 기준)
   document.body.style.lineHeight = '1'
 
