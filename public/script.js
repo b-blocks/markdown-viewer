@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.head.appendChild(style)
 
   // 전체 페이지의 기본 글씨 크기를 10% 줄입니다.
-  document.body.style.fontSize = '60%'
+  document.body.style.fontSize = '50%'
   // 전체 페이지의 기본 줄 간격을 약 10% 줄입니다. (기본값 1.5 기준)
   document.body.style.lineHeight = '1'
 
