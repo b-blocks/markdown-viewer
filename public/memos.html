@@ -2,13 +2,37 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="BB 메모 관리 시스템 - 저장된 모든 메모를 확인하고 관리하세요">
+    <meta name="keywords" content="메모, 노트, 관리, BB">
+    <meta name="author" content="BB">
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="color-scheme" content="light">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="메모 - BB">
+    <meta property="og:description" content="BB 메모 관리 시스템">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="메모 - BB">
+    <meta name="twitter:description" content="BB 메모 관리 시스템">
+    
     <title>메모 - BB</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Korean Fonts -->
+    
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <style>
         :root {
             /* Hermes Luxury Color Palette */
@@ -262,33 +286,33 @@
     <div class="container">
         <header>
             <h1>메모</h1>
-            <div class="header-actions">
-                <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
-                <button class="share-memos-btn" onclick="shareMemosByEmail()">Email</button>
-                <button class="add-memo-btn" onclick="showAddMemoDialog()">새 메모 추가</button>
-            </div>
+            <nav class="header-actions" aria-label="메모 액션">
+                <button class="back-btn" onclick="goBack()" aria-label="이전 페이지로 돌아가기">← 뒤로가기</button>
+                <button class="share-memos-btn" onclick="shareMemosByEmail()" aria-label="이메일로 메모 공유">Email</button>
+                <button class="add-memo-btn" onclick="showAddMemoDialog()" aria-label="새 메모 추가">새 메모 추가</button>
+            </nav>
         </header>
 
         <main class="main-content">
-            <div class="memo-stats">
+            <section class="memo-stats" aria-label="메모 통계">
                 <h3>메모 통계</h3>
                 <div class="stats-grid">
                     <div class="stat-item">
                         <div class="stat-label">전체</div>
-                        <div class="stat-number" id="totalMemos">0</div>
+                        <div class="stat-number" id="totalMemos" aria-live="polite">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">오늘</div>
-                        <div class="stat-number" id="todayMemos">0</div>
+                        <div class="stat-number" id="todayMemos" aria-live="polite">0</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-label">이번 주</div>
-                        <div class="stat-number" id="thisWeekMemos">0</div>
+                        <div class="stat-number" id="thisWeekMemos" aria-live="polite">0</div>
                     </div>
                 </div>
-            </div>
+            </section>
             
-            <div id="memoList" class="memo-list"></div>
+            <section id="memoList" class="memo-list" aria-label="메모 목록"></section>
         </main>
     </div>
     

@@ -30,7 +30,13 @@
       "hljs",
       "IntersectionObserver",
       "requestAnimationFrame",
-      "performance"
+      "cancelAnimationFrame",
+      "performance",
+      "localStorage",
+      "requestIdleCallback",
+      "prompt",
+      "alert",
+      "confirm"
     ]
   }
 }

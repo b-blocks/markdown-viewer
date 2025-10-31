@@ -249,10 +249,13 @@ header h1::after {
     font-size: 0.95rem;
 }
 
-#viewButton:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-    transform: translateY(-1px);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    #viewButton:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+        transform: translateY(-1px);
+    }
 }
 
 #viewButton:active {
@@ -314,12 +317,15 @@ header h1::after {
     font-weight: 500;
 }
 
-#toc-panel a:hover {
-    background: linear-gradient(135deg, var(--border-orange) 0%, rgba(255, 107, 53, 0.1) 100%);
-    color: var(--text-black);
-    transform: translateX(4px);
-    border-left-color: var(--hermes-orange);
-    box-shadow: 0 2px 8px var(--shadow-warm);
+/* Hover effects disabled on mobile to save CPU */
+@media (hover: hover) and (pointer: fine) {
+    #toc-panel a:hover {
+        background: linear-gradient(135deg, var(--border-orange) 0%, rgba(255, 107, 53, 0.1) 100%);
+        color: var(--text-black);
+        transform: translateX(4px);
+        border-left-color: var(--hermes-orange);
+        box-shadow: 0 2px 8px var(--shadow-warm);
+    }
 }
 
 #toc-panel a.active {
@@ -379,6 +385,15 @@ header h1::after {
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
     border-radius: 0 0 0 20px;
     position: relative;
+    /* Improve scrolling performance */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Disable will-change on mobile to reduce CPU usage */
+@media (max-width: 768px) {
+    #content-panel {
+        will-change: auto; /* Remove will-change on mobile */
+    }
 }
 
 #content-panel::before {
@@ -437,9 +452,12 @@ header h1::after {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.add-memo-btn:hover {
-    background-color: #0056b3;
-    transform: scale(1.1);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .add-memo-btn:hover {
+        background-color: #0056b3;
+        transform: scale(1.1);
+    }
 }
 
 .memo-list {
@@ -457,9 +475,12 @@ header h1::after {
     transition: all 0.2s;
 }
 
-.memo-item:hover {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    transform: translateY(-1px);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .memo-item:hover {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
 }
 
 .memo-content {
@@ -497,14 +518,17 @@ header h1::after {
     font-size: 0.8rem;
 }
 
-.memo-edit-btn:hover {
-    background-color: #e3f2fd;
-    color: #007bff;
-}
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .memo-edit-btn:hover {
+        background-color: #e3f2fd;
+        color: #007bff;
+    }
 
-.memo-delete-btn:hover {
-    background-color: #ffebee;
-    color: #dc3545;
+    .memo-delete-btn:hover {
+        background-color: #ffebee;
+        color: #dc3545;
+    }
 }
 
 .memo-edit-form {
@@ -544,8 +568,11 @@ header h1::after {
     border-color: #007bff;
 }
 
-.memo-edit-form .save-btn:hover {
-    background-color: #0056b3;
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .memo-edit-form .save-btn:hover {
+        background-color: #0056b3;
+    }
 }
 
 .memo-edit-form .cancel-btn {
@@ -553,8 +580,11 @@ header h1::after {
     color: #6c757d;
 }
 
-.memo-edit-form .cancel-btn:hover {
-    background-color: #e9ecef;
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .memo-edit-form .cancel-btn:hover {
+        background-color: #e9ecef;
+    }
 }
 
 /* Responsive memo panel */
@@ -671,10 +701,12 @@ header h1::after {
     font-weight: 500;
 }
 
-#content-panel a:hover {
-  color: var(--dark-orange);
-  border-bottom-color: var(--hermes-orange);
-  /* Removed text-shadow for better performance */
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    #content-panel a:hover {
+        color: var(--dark-orange);
+        border-bottom-color: var(--hermes-orange);
+    }
 }
 
 #content-panel code {
@@ -797,10 +829,12 @@ header h1::after {
     transition: transform 0.3s ease;
 }
 
-#content-panel img:hover {
-  transform: scale(1.02);
-  /* Simplified box-shadow for better performance */
-  box-shadow: 0 8px 25px var(--shadow-warm);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    #content-panel img:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px var(--shadow-warm);
+    }
 }
 
 #content-panel hr {
@@ -853,9 +887,11 @@ header h1::after {
     100% { transform: rotate(360deg); }
 }
 
-/* Smooth fade-in for content */
-#content-panel > *:not(.loading-spinner) {
-    animation: fadeIn 0.3s ease-in;
+/* Smooth fade-in for content (disabled on mobile to save CPU) */
+@media (min-width: 769px) {
+    #content-panel > *:not(.loading-spinner) {
+        animation: fadeIn 0.3s ease-in;
+    }
 }
 
 @keyframes fadeIn {
@@ -867,6 +903,19 @@ header h1::after {
 #content-panel pre code {
   contain: layout style;
   /* Removed will-change to prevent unnecessary GPU layer creation */
+}
+
+/* Optimize scrolling performance for large documents */
+body {
+  /* Enable hardware acceleration for smooth scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize content panel children during scroll */
+#content-panel > * {
+  /* Reduce repaints by containing style changes only */
+  /* Using 'style' instead of 'layout paint' to avoid breaking content */
+  contain: style;
 }
 
 /* Auto-Scroll Floating Button */
@@ -892,10 +941,12 @@ header h1::after {
     justify-content: center;
 }
 
-.auto-scroll-btn:hover {
-  transform: translateY(-3px) scale(1.08);
-  /* Simplified box-shadow for better performance */
-  box-shadow: 0 8px 25px var(--shadow-warm);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .auto-scroll-btn:hover {
+        transform: translateY(-3px) scale(1.08);
+        box-shadow: 0 8px 25px var(--shadow-warm);
+    }
 }
 
 .auto-scroll-btn:active {
@@ -919,11 +970,14 @@ header h1::after {
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.auto-scroll-btn.scrolling:hover {
-    box-shadow: 
-        0 8px 25px var(--shadow-warm),
-        0 0 0 3px var(--warm-white),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .auto-scroll-btn.scrolling:hover {
+        box-shadow: 
+            0 8px 25px var(--shadow-warm),
+            0 0 0 3px var(--warm-white),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
 }
 
 .auto-scroll-btn.scrolling .play-icon {
@@ -963,14 +1017,40 @@ header h1::after {
     justify-content: center;
 }
 
-.memo-btn:hover {
-  transform: translateY(-3px) scale(1.08);
-  /* Simplified box-shadow for better performance */
-  box-shadow: 0 8px 25px var(--shadow-warm);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .memo-btn:hover {
+        transform: translateY(-3px) scale(1.08);
+        box-shadow: 0 8px 25px var(--shadow-warm);
+    }
 }
 
 .memo-btn:active {
     transform: translateY(0) scale(0.95);
+}
+
+/* Utility classes */
+.hidden {
+  display: none !important;
+}
+
+/* Error message styles */
+.error-message {
+  color: var(--hermes-orange);
+  font-weight: 500;
+  padding: 1rem;
+  background: rgba(255, 107, 53, 0.1);
+  border-left: 3px solid var(--hermes-orange);
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+/* Empty memo message */
+.memo-empty-message {
+  color: #718096;
+  text-align: center;
+  font-style: italic;
+  padding: 2rem;
 }
 
 /* Selection memo button styles */
@@ -988,9 +1068,12 @@ header h1::after {
   transition: all 0.2s ease;
 }
 
-.selection-memo-btn-style:hover {
-  background: #0056b3;
-  transform: scale(1.05);
+/* Hover effects only on devices with mouse */
+@media (hover: hover) and (pointer: fine) {
+    .selection-memo-btn-style:hover {
+        background: #0056b3;
+        transform: scale(1.05);
+    }
 }
 
 /* Responsive: smaller button on mobile */

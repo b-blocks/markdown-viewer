@@ -34,7 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let isAutoScrolling = false
 
   // Memo system variables, declared early
-  let memoEventListeners = new Map() // Track event listeners for cleanup
+  const memoEventListeners = new Map() // Track event listeners for cleanup
+
+  // Detect mobile device for optimizations
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) ||
+                   ('ontouchstart' in window)
 
   const fileSelectorContainer = document.getElementById('file-selector-container')
   const tocPanel = document.getElementById('toc-panel')
@@ -104,9 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Debouncing utility
-  function debounce(func, wait) {
+  function debounce (func, wait) {
     let timeout
-    return function executedFunction(...args) {
+    return function executedFunction (...args) {
       const later = () => {
         clearTimeout(timeout)
         func(...args)
@@ -116,27 +121,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Throttling utility
-  function throttle(func, limit) {
-    let inThrottle
-    return function() {
-      const args = arguments
-      const context = this
-      if (!inThrottle) {
-        func.apply(context, args)
-        inThrottle = true
-        setTimeout(() => inThrottle = false, limit)
-      }
-    }
-  }
-
   // --- SCROLL HANDLERS ---
   // These are declared here because they are used by loadMarkdown
 
-  // Unified scroll handler with debouncing
-  const handleScroll = debounce(() => {
+  // Optimized scroll handler using requestAnimationFrame for better performance
+  let scrollRafId = null
+  let lastScrollTop = 0
+  let lastMaxScroll = 0
+  let scrollListenerAdded = false
+
+  const handleScroll = () => {
     const currentScroll = getScrollTop()
-    const maxScroll = getMaxScroll()
+
+    // Only check max scroll occasionally to reduce DOM reads
+    // Use cached value if available
+    const maxScroll = cachedMaxScroll || getMaxScroll()
+
+    // Only update if scroll position or max scroll changed significantly
+    if (Math.abs(currentScroll - lastScrollTop) < 1 && Math.abs(maxScroll - lastMaxScroll) < 1) {
+      return
+    }
+
+    lastScrollTop = currentScroll
+    lastMaxScroll = maxScroll
 
     if (currentScroll >= maxScroll - 10) {
       if (isAutoScrolling) {
@@ -146,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       autoScrollBtn.classList.remove('at-bottom')
     }
-  }, 16) // ~60fps
+  }
 
   // Stop auto-scroll if user manually scrolls with the wheel
   const handleWheelScroll = () => {
@@ -156,7 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const handleUnifiedScroll = () => {
-    handleScroll()
+    // Use requestAnimationFrame to throttle scroll events
+    if (scrollRafId === null) {
+      scrollRafId = requestAnimationFrame(() => {
+        handleScroll()
+        scrollRafId = null
+      })
+    }
   }
 
   async function loadMarkdown (url) {
@@ -198,16 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(() => {
         const renderStart = performance.now()
 
-        // Configure marked.js to use highlight.js for syntax highlighting,
-        // but only when a language is specified.
+        // Configure marked.js to skip syntax highlighting initially (lazy loading)
+        // We'll highlight code blocks only when they enter the viewport
         marked.setOptions({
           highlight: function (code, lang) {
-            // If a language is specified and supported by highlight.js, highlight it.
-            if (lang && hljs.getLanguage(lang)) {
-              return hljs.highlight(code, { language: lang, ignoreIllegals: true }).value
-            }
-            // Otherwise, just return the code with HTML escaped, without highlighting.
-            // This prevents content truncation issues with large, un-languaged code blocks.
+            // Just escape HTML, don't highlight yet - we'll do that lazily
             return code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
           }
         })
@@ -220,15 +228,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Generate Table of Contents
         generateToc()
-        
+
         // Make tables responsive for mobile
         makeTablesResponsive()
+
+        // Initialize lazy syntax highlighting
+        initLazySyntaxHighlighting()
+
+        // Invalidate scroll cache when new content is loaded
+        invalidateMaxScrollCache()
 
         const totalTime = performance.now() - startTime
         console.log(`Total load time: ${totalTime.toFixed(2)}ms`)
 
-        // Re-enable scroll handling after content is fully loaded and rendered
-        window.addEventListener('scroll', handleUnifiedScroll, { passive: true })
+        // Re-enable scroll handling after content is fully loaded
+        // Only add listener if not already added to avoid duplicates
+        if (!scrollListenerAdded) {
+          window.addEventListener('scroll', handleUnifiedScroll, { passive: true })
+          scrollListenerAdded = true
+        }
 
         // Explicitly reset scroll position and update button state to avoid race conditions
         requestAnimationFrame(() => {
@@ -248,13 +266,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Cleanup on page unload
   window.addEventListener('beforeunload', () => {
     cleanupMemoSystem()
-    
-    // Clear any remaining timeouts
+
+    // Clean up syntax highlighting observer
+    if (syntaxHighlightObserver) {
+      syntaxHighlightObserver.disconnect()
+      syntaxHighlightObserver = null
+    }
+
+    // Clear any remaining animation frames
     if (autoScrollAnimationId) {
       cancelAnimationFrame(autoScrollAnimationId)
     }
+    if (scrollRafId) {
+      cancelAnimationFrame(scrollRafId)
+    }
   })
-
 
   function generateToc () {
     const headings = contentPanel.querySelectorAll('h1, h2, h3, h4, h5, h6')
@@ -297,20 +323,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Batch append all items at once
     tocItems.forEach(item => tocList.appendChild(item))
     fragment.appendChild(tocList)
-    
+
     // Single DOM update
     tocPanel.innerHTML = ''
     tocPanel.appendChild(fragment)
   }
 
   // Make tables responsive for mobile
-  function makeTablesResponsive() {
+  function makeTablesResponsive () {
     const tables = contentPanel.querySelectorAll('table')
-    
+
     tables.forEach(table => {
       const headers = table.querySelectorAll('th')
       const rows = table.querySelectorAll('tbody tr')
-      
+
       // Add data-label attributes to table cells for mobile display
       rows.forEach(row => {
         const cells = row.querySelectorAll('td')
@@ -323,39 +349,187 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
+  // Lazy syntax highlighting using IntersectionObserver
+  let syntaxHighlightObserver = null
+  let codeBlockDataArray = [] // Store code block data for lazy highlighting
+
+  function initLazySyntaxHighlighting () {
+    // Clean up existing observer if any
+    if (syntaxHighlightObserver) {
+      syntaxHighlightObserver.disconnect()
+      syntaxHighlightObserver = null
+    }
+
+    const codeBlocks = contentPanel.querySelectorAll('pre code')
+    if (codeBlocks.length === 0) return
+
+    // Reset array
+    codeBlockDataArray = []
+
+    // Store original code and language info for each code block
+    codeBlocks.forEach((codeElement, index) => {
+      const preElement = codeElement.parentElement
+
+      // Extract language from code element class or pre element class
+      // marked.js adds language classes to code elements
+      const codeClassName = codeElement.className || ''
+      const preClassName = preElement.className || ''
+      const combinedClass = `${codeClassName} ${preClassName}`
+
+      // Extract language from class name (e.g., "language-javascript" -> "javascript")
+      const langMatch = combinedClass.match(/language-(\w+)/)
+      const lang = langMatch ? langMatch[1] : null
+
+      // Store original code content and language
+      const originalCode = codeElement.textContent
+      codeElement.setAttribute('data-original-code', originalCode)
+      codeElement.setAttribute('data-lang', lang || '')
+      codeElement.setAttribute('data-highlighted', 'false')
+      codeElement.setAttribute('data-index', index.toString())
+
+      codeBlockDataArray.push({
+        element: codeElement,
+        preElement,
+        lang,
+        originalCode,
+        index
+      })
+    })
+
+    // Highlight first 5 code blocks immediately for perceived performance
+    const immediateHighlightCount = Math.min(5, codeBlockDataArray.length)
+    const highlightStart = performance.now()
+
+    for (let i = 0; i < immediateHighlightCount; i++) {
+      highlightCodeBlock(codeBlockDataArray[i])
+    }
+
+    const immediateHighlightTime = performance.now() - highlightStart
+    console.log(`Highlighted first ${immediateHighlightCount} code blocks in ${immediateHighlightTime.toFixed(2)}ms`)
+
+    // Use IntersectionObserver for lazy highlighting of remaining blocks
+    if (codeBlockDataArray.length > immediateHighlightCount) {
+      syntaxHighlightObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const codeElement = entry.target
+            const index = parseInt(codeElement.getAttribute('data-index') || '0')
+
+            if (codeElement.getAttribute('data-highlighted') === 'false' && codeBlockDataArray[index]) {
+              highlightCodeBlock(codeBlockDataArray[index])
+              syntaxHighlightObserver.unobserve(codeElement)
+            }
+          }
+        })
+      }, {
+        // Reduce rootMargin on mobile to save CPU (smaller viewport = less pre-loading needed)
+        rootMargin: isMobile ? '50px' : '100px'
+      })
+
+      // Observe remaining code blocks
+      for (let i = immediateHighlightCount; i < codeBlockDataArray.length; i++) {
+        const { element } = codeBlockDataArray[i]
+        syntaxHighlightObserver.observe(element)
+      }
+    }
+  }
+
+  function highlightCodeBlock (blockData) {
+    const { element, lang, originalCode } = blockData
+
+    if (element.getAttribute('data-highlighted') === 'true') {
+      return // Already highlighted
+    }
+
+    try {
+      let highlightedCode
+
+      if (lang && hljs.getLanguage(lang)) {
+        // Highlight the code
+        highlightedCode = hljs.highlight(originalCode, {
+          language: lang,
+          ignoreIllegals: true
+        }).value
+      } else {
+        // Just escape HTML if no language specified
+        highlightedCode = originalCode
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+      }
+
+      element.innerHTML = highlightedCode
+      element.setAttribute('data-highlighted', 'true')
+
+      // Add hljs class for styling
+      if (lang && hljs.getLanguage(lang)) {
+        element.classList.add('hljs')
+        element.classList.add(`language-${lang}`)
+      }
+    } catch (error) {
+      console.warn('Error highlighting code block:', error)
+      // Fallback to escaped HTML
+      element.innerHTML = originalCode
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+      element.setAttribute('data-highlighted', 'true')
+    }
+  }
+
   // Auto-scroll functionality
   const autoScrollBtn = document.getElementById('autoScrollBtn')
-  const scrollSpeed = 1 // pixels per frame (increased for better performance)
+  const scrollSpeed = 1 // pixels per frame
   const scrollThrottle = 16 // ~60fps throttling
   let lastScrollTime = 0
   let scrollAccumulator = 0
 
-  // Cross-browser compatible scroll position getter
-  function getScrollTop() {
-    return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
+  // Cache for max scroll to avoid expensive DOM reads
+  let cachedMaxScroll = 0
+  let maxScrollCacheTime = 0
+  const maxScrollCacheTTL = 100 // Cache for 100ms to reduce DOM reads
+
+  // Cross-browser compatible scroll position getter (optimized)
+  function getScrollTop () {
+    // Use the most performant method for modern browsers
+    return window.pageYOffset || document.documentElement.scrollTop || 0
   }
 
-  // Cross-browser compatible scroll position setter
-  function setScrollTop(position) {
-    if (window.scrollTo) {
-      window.scrollTo(0, position)
-    } else if (document.documentElement.scrollTop !== undefined) {
-      document.documentElement.scrollTop = position
-    } else if (document.body.scrollTop !== undefined) {
-      document.body.scrollTop = position
+  // Optimized scroll position setter
+  function setScrollTop (position) {
+    // Use scrollTo for consistent behavior across all documents
+    window.scrollTo({
+      top: position,
+      left: 0,
+      behavior: 'auto'
+    })
+  }
+
+  // Optimized scroll height getter with caching
+  function getMaxScroll () {
+    const now = performance.now()
+
+    // Use cached value if still valid
+    if (cachedMaxScroll > 0 && (now - maxScrollCacheTime) < maxScrollCacheTTL) {
+      return cachedMaxScroll
     }
-  }
 
-  // Cross-browser compatible scroll height getter
-  function getMaxScroll() {
-    return Math.max(
+    // Use consistent calculation for all documents
+    cachedMaxScroll = Math.max(
       document.body.scrollHeight,
       document.documentElement.scrollHeight,
       document.body.offsetHeight,
-      document.documentElement.offsetHeight,
-      document.body.clientHeight,
-      document.documentElement.clientHeight
+      document.documentElement.offsetHeight
     ) - window.innerHeight
+
+    maxScrollCacheTime = now
+    return cachedMaxScroll
+  }
+
+  // Invalidate max scroll cache (call when content changes)
+  function invalidateMaxScrollCache () {
+    cachedMaxScroll = 0
+    maxScrollCacheTime = 0
   }
 
   function startAutoScroll () {
@@ -367,12 +541,16 @@ document.addEventListener('DOMContentLoaded', () => {
     lastScrollTime = performance.now()
     scrollAccumulator = 0
 
-    function autoScrollFrame() {
+    // Counter to periodically check max scroll (not every frame)
+    let maxScrollCheckCounter = 0
+    const maxScrollCheckInterval = 5 // Check every 5 frames
+
+    function autoScrollFrame () {
       if (!isAutoScrolling) return
 
       const now = performance.now()
       const deltaTime = now - lastScrollTime
-      
+
       // Throttle to ~60fps
       if (deltaTime < scrollThrottle) {
         autoScrollAnimationId = requestAnimationFrame(autoScrollFrame)
@@ -380,10 +558,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const currentScroll = getScrollTop()
-      const maxScroll = getMaxScroll()
+
+      // Only check max scroll periodically
+      maxScrollCheckCounter++
+      let maxScroll = cachedMaxScroll
+      if (maxScrollCheckCounter >= maxScrollCheckInterval || cachedMaxScroll === 0) {
+        maxScroll = getMaxScroll()
+        maxScrollCheckCounter = 0
+      }
 
       // Stop if reached bottom
-      if (currentScroll >= maxScroll - 10) {
+      const bottomThreshold = 10
+      if (currentScroll >= maxScroll - bottomThreshold) {
         stopAutoScroll()
         autoScrollBtn.classList.add('at-bottom')
         return
@@ -391,10 +577,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Batch scroll updates - accumulate scroll distance
       scrollAccumulator += scrollSpeed
-      
+
       // Only update DOM when we have accumulated enough scroll
-      if (scrollAccumulator >= 1) {
+      const updateThreshold = 1
+      if (scrollAccumulator >= updateThreshold) {
         const scrollAmount = Math.floor(scrollAccumulator)
+        // Use requestAnimationFrame to batch the scroll update
+        // This helps browser optimize layout calculations
         setScrollTop(currentScroll + scrollAmount)
         scrollAccumulator -= scrollAmount
       }
@@ -431,15 +620,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event listeners for auto-scroll button
   autoScrollBtn.addEventListener('click', toggleAutoScroll)
 
-  // Single scroll event listener
-  window.addEventListener('scroll', handleUnifiedScroll, { passive: true }) // This now only handles the button state
-  
-  // Wheel event for immediate response
-  window.addEventListener('wheel', handleWheelScroll, { passive: true })
+  // Single scroll event listener (only add if not already added)
+  if (!scrollListenerAdded) {
+    window.addEventListener('scroll', handleUnifiedScroll, { passive: true })
+    scrollListenerAdded = true
+  }
+
+  // Wheel event for immediate response (only on desktop - mobile doesn't have wheel events)
+  if (!isMobile) {
+    window.addEventListener('wheel', handleWheelScroll, { passive: true })
+  }
 
   // Memo System
 
-  function initMemoSystem() {
+  function initMemoSystem () {
     const memoBtn = document.getElementById('memoBtn')
     const contentPanel = document.getElementById('content-panel')
 
@@ -451,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
       memoBtn.addEventListener('click', memoBtnHandler)
       memoEventListeners.set(memoBtn, { event: 'click', handler: memoBtnHandler })
     }
-    
+
     // Text selection for memo creation
     const textSelectionHandler = handleTextSelection
     contentPanel.addEventListener('mouseup', textSelectionHandler)
@@ -459,39 +653,39 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Cleanup function for memo system
-  function cleanupMemoSystem() {
+  function cleanupMemoSystem () {
     memoEventListeners.forEach((listener, element) => {
       element.removeEventListener(listener.event, listener.handler)
     })
     memoEventListeners.clear()
   }
-  
-  function loadMemos() {
+
+  function loadMemos () {
     const memos = JSON.parse(localStorage.getItem('memos') || '[]')
     const memoList = document.getElementById('memoList')
-    
+
     if (memos.length === 0) {
       memoList.innerHTML = '<p style="color: #718096; text-align: center; font-style: italic;">아직 메모가 없습니다.</p>'
       return
     }
-    
+
     // Sort memos by creation date (newest first)
     memos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-    
+
     // Use DocumentFragment for batch DOM operations
     const fragment = document.createDocumentFragment()
-    
+
     memos.forEach((memo, index) => {
       const memoElement = createMemoElement(memo, index)
       fragment.appendChild(memoElement)
     })
-    
+
     // Single DOM update
     memoList.innerHTML = ''
     memoList.appendChild(fragment)
   }
-  
-  function createMemoElement(memo, index) {
+
+  function createMemoElement (memo, index) {
     const memoDiv = document.createElement('div')
     memoDiv.className = 'memo-item'
     memoDiv.innerHTML = `
@@ -513,12 +707,12 @@ document.addEventListener('DOMContentLoaded', () => {
     `
     return memoDiv
   }
-  
-  function formatTimestamp(timestamp) {
+
+  function formatTimestamp (timestamp) {
     const date = new Date(timestamp)
     const now = new Date()
     const diff = now - date
-    
+
     if (diff < 60000) { // Less than 1 minute
       return '방금 전'
     } else if (diff < 3600000) { // Less than 1 hour
@@ -534,46 +728,39 @@ document.addEventListener('DOMContentLoaded', () => {
       })
     }
   }
-  
-  function showAddMemoDialog() {
-    const content = prompt('메모를 입력하세요:')
-    if (content && content.trim()) {
-      addMemo(content.trim())
-    }
-  }
-  
-  function addMemo(content) {
+
+  function addMemo (content) {
     const memos = JSON.parse(localStorage.getItem('memos') || '[]')
     const newMemo = {
       id: Date.now(),
-      content: content,
+      content,
       timestamp: new Date().toISOString(),
       fileUrl: fileSelector.value || ''
     }
-    
+
     memos.push(newMemo)
     localStorage.setItem('memos', JSON.stringify(memos))
     loadMemos()
   }
-  
-  function editMemo(index) {
+
+  function editMemo (index) {
     const memoItems = document.querySelectorAll('.memo-item')
     const memoItem = memoItems[index]
     const editForm = memoItem.querySelector('.memo-edit-form')
     const content = memoItem.querySelector('.memo-content')
-    
+
     content.style.display = 'none'
     editForm.style.display = 'block'
     editForm.querySelector('textarea').focus()
   }
-  
-  function saveMemoEdit(index) {
+
+  function saveMemoEdit (index) {
     const memos = JSON.parse(localStorage.getItem('memos') || '[]')
     const memoItems = document.querySelectorAll('.memo-item')
     const memoItem = memoItems[index]
     const editForm = memoItem.querySelector('.memo-edit-form')
     const newContent = editForm.querySelector('textarea').value.trim()
-    
+
     if (newContent) {
       memos[index].content = newContent
       memos[index].timestamp = new Date().toISOString()
@@ -583,18 +770,18 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('메모 내용을 입력해주세요.')
     }
   }
-  
-  function cancelMemoEdit(index) {
+
+  function cancelMemoEdit (index) {
     const memoItems = document.querySelectorAll('.memo-item')
     const memoItem = memoItems[index]
     const editForm = memoItem.querySelector('.memo-edit-form')
     const content = memoItem.querySelector('.memo-content')
-    
+
     editForm.style.display = 'none'
     content.style.display = 'block'
   }
-  
-  function deleteMemo(index) {
+
+  function deleteMemo (index) {
     if (confirm('이 메모를 삭제하시겠습니까?')) {
       const memos = JSON.parse(localStorage.getItem('memos') || '[]')
       memos.splice(index, 1)
@@ -602,35 +789,47 @@ document.addEventListener('DOMContentLoaded', () => {
       loadMemos()
     }
   }
-  
-  function handleTextSelection(event) {
+
+  // Throttle text selection handler to avoid excessive CPU usage
+  let lastSelectionTime = 0
+  const selectionThrottle = 200 // ms
+
+  function handleTextSelection (event) {
+    const now = Date.now()
+    if (now - lastSelectionTime < selectionThrottle) {
+      return // Skip if called too frequently
+    }
+    lastSelectionTime = now
+
     const selection = window.getSelection()
     const selectedText = selection.toString().trim()
-    
+
     if (selectedText.length > 0) {
-      // Show a small tooltip or button near the selection
-      showSelectionMemoButton(selectedText, event)
+      // Use requestAnimationFrame to defer non-critical work
+      requestAnimationFrame(() => {
+        showSelectionMemoButton(selectedText, event)
+      })
     }
   }
-  
-  function showSelectionMemoButton(selectedText, event) {
+
+  function showSelectionMemoButton (selectedText, event) {
     // Remove existing memo button if any
     const existingBtn = document.querySelector('.selection-memo-btn')
     if (existingBtn) {
       existingBtn.remove()
     }
-    
+
     // Use DocumentFragment for better performance
     const fragment = document.createDocumentFragment()
     const button = document.createElement('button')
     button.className = 'selection-memo-btn'
     button.textContent = '메모 추가'
-    
+
     // Use CSS classes instead of inline styles for better performance
     button.classList.add('selection-memo-btn-style')
     button.style.left = event.pageX + 'px'
     button.style.top = (event.pageY - 40) + 'px'
-    
+
     // Debounced click handler
     const debouncedClickHandler = debounce(() => {
       const memoContent = `"${selectedText}"\n\n`
@@ -640,19 +839,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       button.remove()
     }, 100)
-    
+
     button.addEventListener('click', debouncedClickHandler)
-    
+
     fragment.appendChild(button)
     document.body.appendChild(fragment)
-    
+
     // Remove button after 3 seconds or when clicking elsewhere
     const removeTimeout = setTimeout(() => {
       if (button.parentNode) {
         button.remove()
       }
     }, 3000)
-    
+
     const removeButtonHandler = (e) => {
       if (!button.contains(e.target)) {
         button.remove()
@@ -660,10 +859,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.removeEventListener('click', removeButtonHandler)
       }
     }
-    
+
     document.addEventListener('click', removeButtonHandler)
   }
-  
+
   // Make functions globally available
   window.editMemo = editMemo
   window.deleteMemo = deleteMemo

@@ -1,37 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BB</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Favicon -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <!-- Korean Fonts -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Modern markdown viewer with table of contents and memo system">
+    <meta name="keywords" content="markdown, viewer, documentation, memo">
+    <meta name="author" content="BB">
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="color-scheme" content="light">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="BB - Markdown Viewer">
+    <meta property="og:description" content="Modern markdown viewer with table of contents and memo system">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="BB - Markdown Viewer">
+    <meta name="twitter:description" content="Modern markdown viewer with table of contents and memo system">
+    
+    <title>BB - Markdown Viewer</title>
+    
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
-    <!-- Local Libraries -->
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="vendor/atom-one-dark.min.css">
-    <script src="vendor/marked.min.js"></script>
-    <script src="vendor/highlight.min.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    
+    <!-- Scripts -->
+    <script src="vendor/marked.min.js" defer></script>
+    <script src="vendor/highlight.min.js" defer></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>BB</h1>
             <div class="url-input-container" id="file-selector-container">
-                <label for="fileSelector" style="display: none;">Select a file:</label>
-                <select id="fileSelector" class="file-selector"></select>
+                <label for="fileSelector" class="sr-only">파일 선택</label>
+                <select id="fileSelector" class="file-selector" aria-label="마크다운 파일 선택"></select>
             </div>
         </header>
         <main class="main-content">
-            <nav id="toc-panel" class="panel"></nav>
-            <article id="content-panel" class="panel"></article>
-            <aside id="memo-panel" class="panel memo-panel">
+            <nav id="toc-panel" class="panel" aria-label="목차"></nav>
+            <article id="content-panel" class="panel" aria-label="콘텐츠"></article>
+            <aside id="memo-panel" class="panel memo-panel" aria-label="메모 패널">
                 <div class="memo-header">
                     <h3>메모</h3>
-                    <button id="addMemoBtn" class="add-memo-btn" title="새 메모 추가">+</button>
+                    <button id="addMemoBtn" class="add-memo-btn" title="새 메모 추가" aria-label="새 메모 추가">+</button>
                 </div>
                 <div id="memoList" class="memo-list"></div>
             </aside>
@@ -39,18 +62,18 @@
     </div>
     
     <!-- Floating Auto-Scroll Button -->
-    <button id="autoScrollBtn" class="auto-scroll-btn" title="Auto Scroll">
-        <svg class="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <button id="autoScrollBtn" class="auto-scroll-btn" title="자동 스크롤" aria-label="자동 스크롤 시작/중지">
+        <svg class="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
         </svg>
-        <svg class="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor"/>
         </svg>
     </button>
     
     <!-- Floating Memo Button -->
-    <button id="memoBtn" class="memo-btn" title="메모 보기">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <button id="memoBtn" class="memo-btn" title="메모 보기" aria-label="메모 보기">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -59,6 +82,6 @@
         </svg>
     </button>
     
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
