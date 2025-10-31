@@ -98,43 +98,32 @@
         }
 
         .memo-stats {
-            padding: 1.5rem;
+            padding: 1rem;
             margin-bottom: 1.5rem;
             border-radius: 8px;
             background-color: var(--primary-orange);
             color: white;
-        }
-
-        .memo-stats h3 {
-            margin: 0 0 0.75rem 0;
-            font-size: 1.14rem; /* 16px */
-            font-weight: 600;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 0.75rem;
-        }
-
-        .stats-grid {
             display: flex;
-            gap: 1.5rem;
             align-items: center;
             flex-wrap: wrap;
-        }
-
-        .stat-item {
-            display: flex;
-            align-items: baseline;
-            gap: 0.5rem;
-        }
-
-        .stat-number {
-            font-size: 1.29rem; /* 18px */
-            font-weight: 600;
-            color: white;
+            gap: 1rem;
         }
 
         .stat-label {
             font-size: 1rem; /* 14px */
             color: rgba(255, 255, 255, 0.8);
+        }
+
+        .stat-number {
+            font-size: 1.07rem; /* 15px */
+            font-weight: 600;
+            color: white;
+            margin-right: 0.5rem; /* Add space after the number */
+        }
+
+        .stats-title {
+            font-weight: 600;
+            font-size: 1.07rem; /* 15px */
         }
 
         .memo-list {
@@ -300,20 +289,14 @@
 
         <main class="main-content">
             <section class="memo-stats" aria-label="메모 통계">
-                <h3>메모 통계</h3>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-label">전체</div>
-                        <div class="stat-number" id="totalMemos" aria-live="polite">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">오늘</div>
-                        <div class="stat-number" id="todayMemos" aria-live="polite">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">이번 주</div>
-                        <div class="stat-number" id="thisWeekMemos" aria-live="polite">0</div>
-                    </div>
+                <div>
+                    <span class="stats-title">메모 통계</span>
+                    <span class="stat-label">전체</span>
+                    <span class="stat-number" id="totalMemos" aria-live="polite">0</span>
+                    <span class="stat-label">오늘</span>
+                    <span class="stat-number" id="todayMemos" aria-live="polite">0</span>
+                    <span class="stat-label">이번 주</span>
+                    <span class="stat-number" id="thisWeekMemos" aria-live="polite">0</span>
                 </div>
             </section>
             
