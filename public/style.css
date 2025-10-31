@@ -17,6 +17,11 @@
     --shadow-warm: rgba(255, 107, 53, 0.15);
 }
 
+html {
+    /* Set base font size to 15px for rem calculation */
+    font-size: 14px; 
+}
+
 body {
     font-family: "Roboto", "Noto Sans KR", "Malgun Gothic", sans-serif;
     margin: 0;
@@ -70,7 +75,7 @@ header::before {
 
 header h1 {
     margin: 0;
-    font-size: 2rem;
+    font-size: 2.29rem; /* 32px */
     font-weight: 700;
     color: var(--text-black);
     letter-spacing: 0.05em;
@@ -212,7 +217,7 @@ header h1::after {
     padding: 0.75rem 1rem;
     border: 2px solid #e1e4e8;
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 1.07rem; /* 15px */
     background-color: white;
     cursor: pointer;
     transition: border-color 0.2s;
@@ -228,7 +233,7 @@ header h1::after {
     padding: 0.75rem 1rem;
     border: 2px solid #e1e4e8;
     border-radius: 6px 0 0 6px;
-    font-size: 0.95rem;
+    font-size: 1.07rem; /* 15px */
     transition: border-color 0.2s;
 }
 
@@ -246,7 +251,7 @@ header h1::after {
     border-radius: 0 6px 6px 0;
     transition: all 0.2s;
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 1.07rem; /* 15px */
 }
 
 /* Hover effects only on devices with mouse */
@@ -276,7 +281,7 @@ header h1::after {
     flex: 0 0 280px;
     background: var(--warm-white);
     border-right: 3px solid var(--hermes-orange);
-    font-size: 0.9rem;
+    font-size: 1rem; /* 14px */
     padding: 2rem 1.5rem;
     box-shadow: 
         4px 0 15px var(--shadow-warm),
@@ -351,21 +356,21 @@ header h1::after {
 }
 #toc-panel a.toc-level-3 { 
     padding-left: 2.5rem; 
-    font-size: 0.875rem;
+    font-size: 1rem; /* 14px */
 }
 #toc-panel a.toc-level-4 { 
     padding-left: 3.5rem; 
-    font-size: 0.875rem;
+    font-size: 1rem; /* 14px */
     color: #718096;
 }
 #toc-panel a.toc-level-5 { 
     padding-left: 4.5rem; 
-    font-size: 0.85rem;
+    font-size: 0.93rem; /* 13px */
     color: #718096;
 }
 #toc-panel a.toc-level-6 { 
     padding-left: 5.5rem; 
-    font-size: 0.85rem;
+    font-size: 0.93rem; /* 13px */
     color: #718096;
 }
 
@@ -412,7 +417,7 @@ header h1::after {
     flex: 0 0 300px;
     background-color: #f8f9fa;
     border-left: 1px solid #e1e4e8;
-    font-size: 0.9rem;
+    font-size: 1rem; /* 14px */
     padding: 1.5rem;
     max-height: 100vh;
     overflow-y: auto;
@@ -430,7 +435,7 @@ header h1::after {
 
 .memo-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.21rem; /* 17px */
     font-weight: 600;
     color: #2d3748;
 }
@@ -442,8 +447,8 @@ header h1::after {
     background-color: #007bff;
     color: white;
     border: none;
-    cursor: pointer;
-    font-size: 1.2rem;
+    cursor: pointer; 
+    font-size: 1.36rem; /* 19px */
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -484,7 +489,7 @@ header h1::after {
 }
 
 .memo-content {
-    font-size: 0.9rem;
+    font-size: 1rem; /* 14px */
     line-height: 1.5;
     color: #2c3e50;
     margin-bottom: 0.5rem;
@@ -495,12 +500,12 @@ header h1::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
+    font-size: 0.86rem; /* 12px */
     color: #718096;
 }
 
 .memo-timestamp {
-    font-size: 0.75rem;
+    font-size: 0.86rem; /* 12px */
 }
 
 .memo-actions {
@@ -515,7 +520,7 @@ header h1::after {
     padding: 0.25rem;
     border-radius: 4px;
     transition: background-color 0.2s;
-    font-size: 0.8rem;
+    font-size: 0.86rem; /* 12px */
 }
 
 /* Hover effects only on devices with mouse */
@@ -541,8 +546,8 @@ header h1::after {
     min-height: 60px;
     padding: 0.5rem;
     border: 1px solid #e1e4e8;
-    border-radius: 4px;
-    font-size: 0.9rem;
+    border-radius: 4px; 
+    font-size: 1rem; /* 14px */
     resize: vertical;
     font-family: inherit;
 }
@@ -558,7 +563,7 @@ header h1::after {
     border: 1px solid #e1e4e8;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.86rem; /* 12px */
     transition: all 0.2s;
 }
 
@@ -606,7 +611,7 @@ header h1::after {
 
 /* Styles for markdown content - Hermes Luxury Design */
 #content-panel h1 {
-    font-size: 2.5rem;
+    font-size: 2.79rem; /* 39px */
     font-weight: 700;
     color: var(--text-black);
     margin-top: var(--heading-spacing);
@@ -630,7 +635,7 @@ header h1::after {
 }
 
 #content-panel h2 {
-    font-size: 1.9rem;
+    font-size: 2.14rem; /* 30px */
     font-weight: 600;
     color: var(--text-black);
     margin-top: var(--heading-spacing);
@@ -643,7 +648,7 @@ header h1::after {
 }
 
 #content-panel h3 {
-    font-size: 1.5rem;
+    font-size: 1.64rem; /* 23px */
     font-weight: 600;
     color: var(--text-black);
     margin-top: 2.5rem;
@@ -655,7 +660,7 @@ header h1::after {
 }
 
 #content-panel h4 {
-    font-size: 1.25rem;
+    font-size: 1.36rem; /* 19px */
     font-weight: 600;
     color: var(--text-black);
     margin-top: 2rem;
@@ -665,7 +670,7 @@ header h1::after {
 }
 
 #content-panel h5, #content-panel h6 {
-    font-size: 1.1rem;
+    font-size: 1.14rem; /* 16px */
     font-weight: 600;
     color: var(--warm-gray);
     margin-top: 1.75rem;
@@ -676,7 +681,7 @@ header h1::after {
 #content-panel p {
     margin-bottom: var(--paragraph-spacing);
     color: var(--text-black);
-    font-size: 1.1rem;
+    font-size: 1.14rem; /* 16px */
     line-height: var(--line-height);
     text-shadow: 0.25px 0.25px 0.5px rgba(0, 0, 0, 0.05);
 }
@@ -689,7 +694,7 @@ header h1::after {
 #content-panel li {
     margin-bottom: 0.5rem;
     color: #2c3e50;
-    font-size: 1.05rem;
+    font-size: 1.07rem; /* 15px */
     line-height: var(--line-height);
 }
 
@@ -714,7 +719,7 @@ header h1::after {
     color: #f1c40f;      /* Yellow text */
     padding: 0.3em 0.6em;
     border-radius: 6px;
-    font-size: 0.9em;
+    font-size: 1em; /* ~14px */
     font-family: "Consolas", "Courier New", "Monaco", monospace;
     font-weight: 600;
 }
@@ -737,7 +742,7 @@ header h1::after {
   color: #f1c40f; /* Set base text color to yellow */
   padding: 0;
   border: none;
-  font-size: 0.95rem;
+  font-size: 1rem; /* 14px */
   font-weight: 500;
   font-family: "Consolas", "Courier New", "Monaco", monospace;
   /* Removed text-shadow for better performance */
@@ -763,7 +768,7 @@ header h1::after {
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
     position: relative;
     font-style: italic;
-    font-size: 1.05rem;
+    font-size: 1.07rem; /* 15px */
     line-height: 1.6;
 }
 
@@ -782,7 +787,7 @@ header h1::after {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 2rem;
-    font-size: 1rem;
+    font-size: 1rem; /* 14px */
     min-width: 0; /* Allow table to shrink */
     table-layout: fixed; /* Fixed layout for better responsive behavior */
     word-wrap: break-word; /* Break long words in cells */
@@ -802,7 +807,7 @@ header h1::after {
     hyphens: auto;
     color: var(--warm-white);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    font-size: 1.05rem;
+    font-size: 1.07rem; /* 15px */
 }
 
 #content-panel td {
@@ -868,7 +873,7 @@ header h1::after {
 
 .loading-spinner p {
     color: #4a5568;
-    font-size: 1.1rem;
+    font-size: 1.14rem; /* 16px */
     margin-bottom: 1.5rem;
     font-weight: 500;
 }
@@ -1062,7 +1067,7 @@ body {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.86rem; /* 12px */
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   transition: all 0.2s ease;

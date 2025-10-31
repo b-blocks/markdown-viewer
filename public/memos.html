@@ -26,7 +26,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="style.css">
@@ -41,6 +41,11 @@
             --primary-orange-light: rgba(237, 127, 53, 0.1); /* Lighter shade for hover effects */
             --danger-red: #dc3545;
             --danger-red-light: #ffebee;
+        }
+
+        html {
+            /* Set base font size to 15px for rem calculation */
+            font-size: 14px;
         }
 
         body {
@@ -64,7 +69,7 @@
 
         header h1 {
             margin: 0;
-            font-size: 2rem;
+            font-size: 2.29rem; /* 32px */
             font-weight: 600;
             color: var(--text-color, #1f2937);
         }
@@ -78,7 +83,7 @@
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 1rem; /* 14px */
             font-weight: 500;
             white-space: nowrap;
             transition: background-color 0.2s;
@@ -102,7 +107,7 @@
 
         .memo-stats h3 {
             margin: 0 0 0.75rem 0;
-            font-size: 1rem;
+            font-size: 1.14rem; /* 16px */
             font-weight: 600;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding-bottom: 0.75rem;
@@ -122,13 +127,13 @@
         }
 
         .stat-number {
-            font-size: 1.2rem;
+            font-size: 1.29rem; /* 18px */
             font-weight: 600;
             color: white;
         }
 
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 1rem; /* 14px */
             color: rgba(255, 255, 255, 0.8);
         }
 
@@ -148,7 +153,7 @@
         }
 
         .memo-content-text {
-            font-size: 1rem;
+            font-size: 1.07rem; /* 15px */
             line-height: 1.6;
             color: #e8e8e8;
             margin-bottom: 1rem;
@@ -164,7 +169,7 @@
 
         .memo-meta {
             display: flex;
-            font-size: 0.9rem;
+            font-size: 1rem; /* 14px */
             color: var(--text-color-lighter, #6b7280);
             border-top: 1px solid var(--border-color-light, #f3f4f6);
             padding-top: 1rem;
@@ -175,7 +180,7 @@
 
         .memo-timestamp {
             color: #aaa;
-            font-size: 0.85rem;
+            font-size: 0.86rem; /* 12px */
         }
 
         .memo-actions-buttons {
@@ -192,7 +197,7 @@
             padding: 0.5rem 1rem;
             border-radius: 4px;
             transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 1rem; /* 14px */
             color: #ccc;
         }
 
@@ -222,7 +227,7 @@
             padding: 0.75rem;
             border: 1px solid var(--border-color, #e5e7eb);
             border-radius: 4px;
-            font-size: 1rem;
+            font-size: 1.07rem; /* 15px */
             resize: vertical;
             font-family: inherit;
         }
@@ -238,7 +243,7 @@
             border: 1px solid transparent;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 1rem; /* 14px */
             transition: all 0.2s;
         }
 
@@ -277,7 +282,7 @@
 
         .empty-state p {
             margin: 0;
-            font-size: 1.1rem;
+            font-size: 1.14rem; /* 16px */
         }
 
     </style>
