@@ -38,6 +38,23 @@
     <!-- Scripts -->
     <script src="vendor/marked.min.js" defer></script>
     <script src="vendor/highlight.min.js" defer></script>
+    <style>
+        /* 모바일 화면에서 플로팅 버튼 위치 조정 */
+        @media (max-width: 768px) {
+            .memo-btn {
+                right: 1.5rem; /* 오른쪽 여백 조정 (왼쪽으로 이동) */
+                bottom: 2rem;
+            }
+            .auto-scroll-btn {
+                right: 1.5rem; /* 오른쪽 여백 조정 (왼쪽으로 이동) */
+                bottom: 5.5rem; /* 메모 버튼과의 간격 확보 */
+            }
+        }
+        /* 데스크탑 화면에서 플로팅 버튼 위치 조정 */
+        .auto-scroll-btn { bottom: 6rem; }
+        .memo-btn { bottom: 2.5rem; }
+        .auto-scroll-btn, .memo-btn { right: 2.5rem; }
+    </style>
 </head>
 <body>
     <div class="container">
