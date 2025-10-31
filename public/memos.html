@@ -107,6 +107,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 1rem;
+            justify-content: space-between;
         }
 
         .stat-label {
@@ -124,6 +125,12 @@
         .stats-title {
             font-weight: 600;
             font-size: 1.07rem; /* 15px */
+        }
+
+        .stats-items {
+            display: flex;
+            gap: 1rem;
+            align-items: baseline;
         }
 
         .memo-list {
@@ -289,8 +296,8 @@
 
         <main class="main-content">
             <section class="memo-stats" aria-label="메모 통계">
-                <div>
-                    <span class="stats-title">메모 통계</span>
+                <span class="stats-title">메모 통계</span>
+                <div class="stats-items">
                     <span class="stat-label">전체</span>
                     <span class="stat-number" id="totalMemos" aria-live="polite">0</span>
                     <span class="stat-label">오늘</span>
