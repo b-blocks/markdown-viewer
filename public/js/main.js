@@ -163,4 +163,32 @@ document.addEventListener('DOMContentLoaded', () => {
     cleanupSyntaxHighlighting()
     cleanupAutoScroll()
   })
+
+  // Handle bfcache (back-forward cache) when user navigates back to the page
+  window.addEventListener('pageshow', (event) => {
+    // The persisted property is false on initial load, and true if page is from bfcache.
+    if (event.persisted) {
+      console.log('Page loaded from bfcache. Re-initializing systems.')
+
+      // Re-initialize systems that might have been affected
+      const autoScrollBtn = document.getElementById('autoScrollBtn')
+      if (autoScrollBtn) {
+        initAutoScroll(autoScrollBtn)
+      }
+
+      const memoList = document.getElementById('memoList')
+      if (memoList) {
+        loadMemos(memoList)
+      }
+
+      // Re-initialize memo system event listeners
+      const memoBtn = document.getElementById('memoBtn')
+      const contentPanel = document.getElementById('content-panel')
+      if (memoBtn && contentPanel) {
+        initMemoSystem(memoBtn, contentPanel, addMemoCallback, memoList)
+      }
+
+      enableScrollHandling()
+    }
+  })
 })
